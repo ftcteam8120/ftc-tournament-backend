@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "app",
+      "script": "./build/index.js",
+      "watch": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
