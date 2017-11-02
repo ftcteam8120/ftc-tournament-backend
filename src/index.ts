@@ -10,7 +10,9 @@ import * as bearerToken from 'express-bearer-token';
 import passport, { auth, authMiddleware } from './v1/auth';
 import { errorHandler, errorLogger } from './utils/errorHandlers';
 
-dotenv.config();
+if (process.env.NODE_ENV != 'production') {
+  dotenv.config();
+}
 
 import { logger, expressMiddleware } from './logger';
 

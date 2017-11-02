@@ -5,7 +5,10 @@
   "author": "FTC Team 8120",
   "license": "MIT",
   "scripts": {
-    "start": "node_modules/.bin/nodemon"
+    "start": "node_modules/.bin/nodemon",
+    "build": "node node_modules/rimraf/bin.js build && node_modules/.bin/tsc && npm run container-build",
+    "container-build": "docker build -t ftc-tournament-backend .",
+    "container": "docker run -p 8080:80 --net=host -e MONGO_URL=mongodb://localhost/ftc-tournament-server -e SECRET=very_secret ftc-tournament-backend"
   },
   "devDependencies": {
     "@types/bcrypt": "^1.0.0",
@@ -14,22 +17,23 @@
     "@types/dotenv": "^4.0.1",
     "@types/express": "^4.0.37",
     "@types/express-session": "^1.15.3",
+    "@types/http-status-codes": "^1.0.29",
+    "@types/jsonwebtoken": "^7.2.3",
     "@types/mongoose": "^4.7.24",
     "@types/passport": "^0.3.4",
     "@types/passport-local": "^1.0.31",
-    "dotenv": "^4.0.0",
+    "generate-secret": "^0.1.7",
     "nodemon": "^1.12.1",
     "ts-node": "^3.3.0",
     "typescript": "^2.5.3"
   },
   "dependencies": {
-    "@types/http-status-codes": "^1.0.29",
-    "@types/jsonwebtoken": "^7.2.3",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "connect-redis": "^3.3.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
+    "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "express-bearer-token": "^2.1.0",
     "express-flash": "^0.0.2",
