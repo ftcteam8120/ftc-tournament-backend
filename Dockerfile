@@ -8,6 +8,10 @@ ENV PORT 8080
 ENV NODE_ENV production
 ENV NPM_CONFIG_LOGLEVEL info
 
+# Set the database server and secret
+ENV MONGO_URI mongodb://server:robotics@ds243335.mlab.com:43335/ftc-tournament-server
+ENV SECRET very_secret
+
 # Copy package.json adn yarn.lock
 COPY package.json /build/
 COPY yarn.lock /build/

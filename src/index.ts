@@ -16,12 +16,16 @@ if (process.env.NODE_ENV != 'production') {
 
 import { logger, expressMiddleware } from './logger';
 
+console.log(process.env.MONGO_URI);
+
 (mongoose as any).Promise = global.Promise;
-mongoose.connect(process.env.MONGO_URL, {
+mongoose.connect(process.env.MONGO_URI, {
   useMongoClient: true
 }).then(() => {
-  logger.info('Connected to MongoDB', process.env.MONGO_URL);
-});
+  logger.info('Connected to MongoDB', process.env.MONGO_URI);
+}).catch((error) => {
+  logger.error('Error connecting to MongoDB', process.env.MONGO_URI);
+})
 
 // Create an express server
 const app = express();
