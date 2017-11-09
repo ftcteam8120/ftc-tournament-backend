@@ -1,8 +1,8 @@
 # Pull from latest PM2 image
 FROM keymetrics/pm2:latest
 
-# Set default api port to 8080
-ENV PORT 8080
+# Set default api port to 8081
+ENV PORT 8081
 
 # Set NODE_ENV to production
 ENV NODE_ENV production
@@ -29,6 +29,6 @@ RUN npm install --production
 COPY pm2.json .
 
 # Expose the external port
-EXPOSE 8080
+EXPOSE 8081
 
 CMD [ "pm2-docker", "start", "pm2.json" ]
