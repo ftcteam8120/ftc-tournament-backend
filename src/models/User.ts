@@ -102,7 +102,7 @@ export class User extends Typegoose {
     return cleaned;
   }
   @staticMethod
-  static findByShortId(this: ModelType<User> & typeof User, id: string): mongoose.DocumentQuery<InstanceType<User>, InstanceType<User>> {
+  static findFor(this: ModelType<User> & typeof User, id: string): mongoose.DocumentQuery<InstanceType<User>, InstanceType<User>> {
     if (mongoose.Types.ObjectId.isValid(id)) {
       return this.findById(id);
     } else {

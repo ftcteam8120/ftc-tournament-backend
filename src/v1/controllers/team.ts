@@ -15,7 +15,7 @@ team.get('/', (req: Request, res: Response) => {
 });
 
 team.get('/:id', (req: Request, res: Response) => {
-  let promise = TeamModel.findByShortId(req.params.id);
+  let promise = TeamModel.findFor(req.params.id);
   if (req.body.populate || req.query.populate) {
     promise.populate('coaches').populate('members');
   }
@@ -67,5 +67,22 @@ team.post('/', (req: Request, res: Response) => {
   })
   return newTeam.save().then(() => {
     success(req, res, newTeam.toJSON());
+  });
+});
+
+team.patch('/:id', (req: Request, res: Response) => {
+  return TeamModel.findFor(req.params.id).then((team: InstanceType<Team>) => {
+    if (!team) {
+      badRequest(req, res);
+    } else {
+      for (var key in req.body) {
+        if (req.body[key]) {
+          team[key] = req.body[key];
+        }
+      }
+      return team.save().then(() => {
+        success(req, res, team);
+      });
+    }
   });
 });

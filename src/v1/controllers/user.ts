@@ -12,7 +12,7 @@ export function getUser(req: Request, res: Response, metadata?: any) {
       return success(req, res, req.user, metadata);
     }
   }
-  UserModel.findByShortId(req.user._id || req.params.id).then((user: InstanceType<User>) => {
+  UserModel.findFor(req.user._id || req.params.id).then((user: InstanceType<User>) => {
     if (!user) {
       notFound(req, res);
     } else {

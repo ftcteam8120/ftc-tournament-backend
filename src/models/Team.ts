@@ -41,11 +41,15 @@ export class Team extends Typegoose {
     });
   }
   @staticMethod
-  static findByShortId(this: ModelType<Team> & typeof Team, id: string): mongoose.DocumentQuery<InstanceType<Team>, InstanceType<Team>> {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      return this.findById(id);
+  static findFor(this: ModelType<Team> & typeof Team, id: string): mongoose.DocumentQuery<InstanceType<Team>, InstanceType<Team>> {
+    if (parseInt(id)) {
+      return this.findOne({ number: id });
     } else {
-      return this.findOne({ shortid: id });
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        return this.findById(id);
+      } else {
+        return this.findOne({ shortid: id });
+      }
     }
   }
 }
