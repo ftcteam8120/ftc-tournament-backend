@@ -2,6 +2,7 @@ import { Request, Response, Router, Express } from 'express';
 import passport, { auth, authMiddleware } from './auth';
 import { user } from './controllers/user';
 import { team } from './controllers/team';
+import { tournament } from './controllers/tournament';
 
 //const RedisStore = connectRedis(session);
 
@@ -18,4 +19,5 @@ apiv1.use(passport.session());
 
 apiv1.use('/auth', auth);
 apiv1.use('/user', authMiddleware, user);
-apiv1.use('/team', authMiddleware, team)
+apiv1.use('/team', authMiddleware, team);
+apiv1.use('/tournament', authMiddleware, tournament);

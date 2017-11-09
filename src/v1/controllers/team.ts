@@ -40,15 +40,11 @@ team.get('/:id', (req: Request, res: Response) => {
 team.post('/', (req: Request, res: Response) => {
   let coaches = [req.user._id];
   if (req.body.coaches) {
-    for (var id in req.body.coaches) {
-      coaches.push(id);
-    }
+    coaches.concat(req.body.coaches);
   }
   let members = [];
   if (req.body.members) {
-    for (var id in req.body.members) {
-      members.push(id);
-    }
+    members = req.body.members;
   }
   if (!req.body.name || !req.body.number) {
     return badRequest(req, res, [
@@ -77,7 +73,13 @@ team.patch('/:id', (req: Request, res: Response) => {
     } else {
       for (var key in req.body) {
         if (req.body[key]) {
-          team[key] = req.body[key];
+          switch (key) {
+            case 'number':
+              team[key] = Number(req.body[key]);
+              break;
+            default:
+              team[key] = req.body[key];
+          }
         }
       }
       return team.save().then(() => {
