@@ -7,8 +7,12 @@ import * as flash from 'express-flash';
 import * as mongoose from 'mongoose';
 import * as cors from 'cors';
 import * as bearerToken from 'express-bearer-token';
+import * as shortid from 'shortid';
 import passport, { auth, authMiddleware } from './v1/auth';
 import { errorHandler, errorLogger } from './utils/errorHandlers';
+
+// Set shortid characters
+shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 
 if (process.env.NODE_ENV != 'production') {
   dotenv.config();

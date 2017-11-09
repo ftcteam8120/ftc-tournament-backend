@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { OK, getStatusText } from 'http-status-codes';
 import { ModelType, InstanceType } from 'typegoose';
-import { success } from '../../utils/responders';
+import { success, notFound } from '../../utils/responders';
 import { User, UserModel } from '../../models/User';
 
 export let user = Router();
@@ -12,8 +12,12 @@ export function getUser(req: Request, res: Response, metadata?: any) {
       return success(req, res, req.user, metadata);
     }
   }
-  UserModel.findById(req.user._id || req.params.id).then((user: InstanceType<User>) => {
-    success(req, res, user.clean(), metadata);
+  UserModel.findByShortId(req.user._id || req.params.id).then((user: InstanceType<User>) => {
+    if (!user) {
+      notFound(req, res);
+    } else {
+      success(req, res, user.clean(), metadata);
+    }
   });
 }
 

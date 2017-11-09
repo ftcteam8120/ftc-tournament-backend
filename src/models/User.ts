@@ -1,6 +1,15 @@
-import * as mongoose from "mongoose";
-import { prop, arrayProp, pre, staticMethod, instanceMethod, Typegoose, ModelType, InstanceType } from 'typegoose';
+import * as mongoose from 'mongoose';
+import * as shortid from 'shortid';
+import { prop, arrayProp, pre, staticMethod, instanceMethod, Typegoose, ModelType, InstanceType, Ref } from 'typegoose';
 import * as bcrypt from 'bcrypt';
+
+
+export function cleanUserRef(ref: Ref<User>): InstanceType<User> {
+  let doc: InstanceType<any> = new UserModel(ref.valueOf());
+  doc.isNew = false;
+  doc.clean();
+  return doc;
+}
 
 export class Email extends Typegoose {
   @prop()
@@ -64,6 +73,8 @@ export class Profile extends Typegoose {
 })
 export class User extends Typegoose {
   id: string;
+  @prop({ required: true, unique: true, default: shortid.generate })
+  shortid: string;
   @prop({ unique: true })
   username?: string;
   @prop()
@@ -89,7 +100,15 @@ export class User extends Typegoose {
     cleaned.__v = undefined;
     cleaned.cleaned = true;
     return cleaned;
-  };
+  }
+  @staticMethod
+  static findByShortId(this: ModelType<User> & typeof User, id: string): mongoose.DocumentQuery<InstanceType<User>, InstanceType<User>> {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      return this.findById(id);
+    } else {
+      return this.findOne({ shortid: id });
+    }
+  }
 }
 
 export const UserModel = new User().getModelForClass(User);

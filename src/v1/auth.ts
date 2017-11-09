@@ -58,15 +58,6 @@ auth.post('/login', passport.authenticate('local', {
   }
 );
 
-auth.post('/test', (req, res) => {
-  res.json({ data: req.body });
-});
-
-auth.get('/logout', (req: Request, res: Response) => {
-  //req.logout();
-  success(req, res, {});
-});
-
 function generateJWT(user: InstanceType<User>) {
   return jwt.sign({
     id: user._id,

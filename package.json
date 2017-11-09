@@ -24,6 +24,7 @@
     "@types/mongoose": "^4.7.24",
     "@types/passport": "^0.3.4",
     "@types/passport-local": "^1.0.31",
+    "@types/shortid": "^0.0.29",
     "generate-secret": "^0.1.7",
     "nodemon": "^1.12.1",
     "ts-node": "^3.3.0",
@@ -46,6 +47,7 @@
     "mongoose": "^4.12.4",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
+    "shortid": "^2.2.8",
     "typegoose": "^3.5.2",
     "winston": "^2.4.0"
   }
