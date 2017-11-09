@@ -4,38 +4,38 @@ import { ModelType, InstanceType, Ref } from 'typegoose';
 import { success, badRequest, notFound } from '../../utils/responders';
 import { User, UserModel, cleanUserRef } from '../../models/User';
 import { Team, TeamModel } from '../../models/Team';
-import { Tournament, TournamentModel } from '../../models/Tournament';
+import { Event, EventModel } from '../../models/Event';
 import { Types } from 'mongoose';
 
-export let tournament = Router();
+export let event = Router();
 
-tournament.get('/', (req: Request, res: Response) => {
-  return TournamentModel.find().then((tournaments: InstanceType<Tournament>[]) => {
-    success(req, res, tournaments);
+event.get('/', (req: Request, res: Response) => {
+  return EventModel.find().then((events: InstanceType<Event>[]) => {
+    success(req, res, events);
   });
 });
 
-tournament.get('/:id', (req: Request, res: Response) => {
-  let promise = TournamentModel.findFor(req.params.id);
+event.get('/:id', (req: Request, res: Response) => {
+  let promise = EventModel.findFor(req.params.id);
   if (req.body.populate || req.query.populate) {
     promise.populate('admins').populate('teams');
   }
-  return promise.then((tournament: InstanceType<Tournament>) => {
-    if (!tournament) {
+  return promise.then((event: InstanceType<Event>) => {
+    if (!event) {
       notFound(req, res);
     } else {
       if (req.body.populate || req.query.populate) {
-        // Clean tournament members and coaches if populated
-        for (var i = 0; i < tournament.admins.length; i++) {
-          (tournament.admins[i] as any) = cleanUserRef(tournament.admins[i]).toJSON();
+        // Clean event members and coaches if populated
+        for (var i = 0; i < event.admins.length; i++) {
+          (event.admins[i] as any) = cleanUserRef(event.admins[i]).toJSON();
         }
       }
-      success(req, res, tournament);
+      success(req, res, event);
     }
   });
 });
 
-function createTournament(req, res, admins, teams) {
+function createEvent(req, res, admins, teams) {
   if (!req.body.name) {
     return badRequest(req, res, [
       'name'
@@ -57,7 +57,7 @@ function createTournament(req, res, admins, teams) {
       return badRequest(req, res, [], { error: 'Invalid date format for end date' });
     }
   }
-  let newTournament = new TournamentModel({
+  let newEvent = new EventModel({
     admins,
     teams,
     current_round: 0,
@@ -69,12 +69,12 @@ function createTournament(req, res, admins, teams) {
     primary_color: req.body.primary_color,
     secondary_color: req.body.secondary_color
   })
-  return newTournament.save().then(() => {
-    success(req, res, newTournament.toJSON());
+  return newEvent.save().then(() => {
+    success(req, res, newEvent.toJSON());
   });
 }
 
-tournament.post('/', (req: Request, res: Response) => {
+event.post('/', (req: Request, res: Response) => {
   let admins = [req.user._id];
   if (req.body.admins) {
     admins = req.body.admins;
@@ -92,37 +92,37 @@ tournament.post('/', (req: Request, res: Response) => {
       for (var i = 0; i < teamResults.length; i++) {
         teams.push(teamResults[i]._id);
       }
-      return createTournament(req, res, admins, teams);
+      return createEvent(req, res, admins, teams);
     });
   } else {
-    return createTournament(req, res, admins, teams);
+    return createEvent(req, res, admins, teams);
   }
 });
 
-tournament.patch('/:id', (req: Request, res: Response) => {
-  return TournamentModel.findFor(req.params.id).then((tournament: InstanceType<Tournament>) => {
-    if (!tournament) {
+event.patch('/:id', (req: Request, res: Response) => {
+  return EventModel.findFor(req.params.id).then((event: InstanceType<Event>) => {
+    if (!event) {
       badRequest(req, res);
     } else {
       for (var key in req.body) {
         if (req.body[key]) {
           switch (key) {
             case 'start':
-              tournament[key] = new Date(req.body[key]);
+              event[key] = new Date(req.body[key]);
               break;
             case 'end':
-              tournament[key] = new Date(req.body[key]);
+              event[key] = new Date(req.body[key]);
               break;
             case 'current_round':
-            tournament[key] = Number(req.body[key]);
+            event[key] = Number(req.body[key]);
               break;
             default:
-              tournament[key] = req.body[key];
+              event[key] = req.body[key];
           }
         }
       }
-      return tournament.save().then(() => {
-        success(req, res, tournament);
+      return event.save().then(() => {
+        success(req, res, event);
       });
     }
   });

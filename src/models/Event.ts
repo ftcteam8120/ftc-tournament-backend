@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserModel } from './User';
 import { Team, TeamModel } from './Team';
 
-export class Tournament extends Typegoose {
+export class Event extends Typegoose {
   @prop({ required: true, unique: true, default: shortid.generate })
   shortid: string;
   @arrayProp({ itemsRef: User, required: true })
@@ -30,7 +30,7 @@ export class Tournament extends Typegoose {
   @prop()
   secondary_color: string;
   @staticMethod
-  static findFor(this: ModelType<Tournament> & typeof Tournament, id: string): mongoose.DocumentQuery<InstanceType<Tournament>, InstanceType<Tournament>> {
+  static findFor(this: ModelType<Event> & typeof Event, id: string): mongoose.DocumentQuery<InstanceType<Event>, InstanceType<Event>> {
     if (mongoose.Types.ObjectId.isValid(id)) {
       return this.findById(id);
     } else {
@@ -39,5 +39,5 @@ export class Tournament extends Typegoose {
   }
 }
 
-export const TournamentModel = new Tournament().getModelForClass(Tournament);
-export default TournamentModel;
+export const EventModel = new Event().getModelForClass(Event);
+export default EventModel;
