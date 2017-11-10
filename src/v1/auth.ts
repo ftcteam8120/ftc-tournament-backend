@@ -10,6 +10,11 @@ import { getUser } from './controllers/user';
 
 import { User, UserModel } from '../models/User';
 
+enum LoginErrors {
+  INCORRECT_PASSWORD = 'INCORRECT_PASSWORD',
+  NOT_FOUND = 'NOT_FOUND'
+}
+
 passport.serializeUser((user: InstanceType<User>, done) => {
   done(null, user._id);
 });
@@ -21,17 +26,22 @@ passport.deserializeUser((id, done) => {
 });
 
 passport.use(new LocalStrategy((username, password, done) => {
-  UserModel.findOne({ username: username }, (err, user: InstanceType<User>) => {
-    if (err) return done(err);
+  UserModel.findOne({ username: username }).then((user: InstanceType<User>) => {
     if (!user) {
-      return done(null, false, { message: 'Incorrect username' });
+      done(null, false, { message: LoginErrors.NOT_FOUND });
     } else {
       user.validPassword(password).then(valid => {
-        return done(null, user.clean());
+        if (valid) {
+          done(null, user.clean());
+        } else {
+          done(null, false, { message: LoginErrors.INCORRECT_PASSWORD });
+        }
       }).catch(err => {
-        return done(null, false, { message: 'Incorrect password' });
+        done(err, false);
       });
     }
+  }).catch((err) => {
+    done(err, false);
   });
 }));
 
@@ -49,14 +59,23 @@ auth.get('/', (req: Request & { token: string }, res: Response) => {
   });
 });
 
-auth.post('/login', passport.authenticate('local', {
+auth.post('/login', (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('local', {
     session: false
-  }), (req: Request, res: Response) => {
-    getUser(req, res, {
-      token: generateJWT(req.user)
-    });
-  }
-);
+  }, (err, user, info) => {
+    if (err) {
+      serverError(req, res, err);
+    } else {
+      if (user === false) {
+        unauthorized(req, res, info.message);
+      } else {
+        success(req, res, user, {
+          token: generateJWT(user)
+        });
+      }
+    }
+  })(req, res, next);
+});
 
 function generateJWT(user: InstanceType<User>) {
   return jwt.sign({
