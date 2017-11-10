@@ -2,19 +2,21 @@ import { Request, Response, Router } from 'express';
 import { OK, getStatusText } from 'http-status-codes';
 import { ModelType, InstanceType, Ref } from 'typegoose';
 import { success, badRequest, notFound } from '../../utils/responders';
+import { catcher } from '../../utils/errorHandlers';
+import { requireFields } from '../../utils/requireFields';
 import { User, UserModel, cleanUserRef } from '../../models/User';
 import { Team, TeamModel } from '../../models/Team';
 import { Types } from 'mongoose';
 
 export let team = Router();
 
-team.get('/', (req: Request, res: Response) => {
+team.get('/', catcher((req: Request, res: Response) => {
   return TeamModel.find().then((teams: InstanceType<Team>[]) => {
     success(req, res, teams);
   });
-});
+}));
 
-team.get('/:id', (req: Request, res: Response) => {
+team.get('/:id', catcher((req: Request, res: Response) => {
   let promise = TeamModel.findFor(req.params.id);
   if (req.body.populate || req.query.populate) {
     promise.populate('coaches').populate('members');
@@ -35,38 +37,46 @@ team.get('/:id', (req: Request, res: Response) => {
       success(req, res, team);
     }
   });
-});
+}));
 
-team.post('/', (req: Request, res: Response) => {
-  let coaches = [req.user._id];
-  if (req.body.coaches) {
-    coaches.concat(req.body.coaches);
+function createTeam(data) {
+  let coaches = [];
+  if (data.coaches) {
+    coaches = data.coaches;
   }
   let members = [];
-  if (req.body.members) {
-    members = req.body.members;
+  if (data.members) {
+    members = data.members;
   }
-  if (!req.body.name || !req.body.number) {
-    return badRequest(req, res, [
-      'name',
-      'number'
-    ]);
-  }
-  let newTeam = new TeamModel({
-    name: req.body.name,
-    number: Number(req.body.number),
-    biography: req.body.biography,
-    location: req.body.location,
-    photo_url: req.body.photo_url,
+  return new TeamModel({
+    name: data.name,
+    number: Number(data.number),
+    biography: data.biography,
+    location: data.location,
+    photo_url: data.photo_url,
     coaches,
     members
-  })
-  return newTeam.save().then(() => {
-    success(req, res, newTeam.toJSON());
-  });
-});
+  }).save();
+}
 
-team.patch('/:id', (req: Request, res: Response) => {
+team.post('/', requireFields(['name', 'number'], 'teams'), catcher((req: Request, res: Response) => {
+  if (req.body.teams) {
+    let promises = [];
+    for (var i = 0; i < req.body.teams.length; i++) {
+      promises.push(createTeam(req.body.teams[i]));
+    }
+    return Promise.all(promises).then((teams: InstanceType<Team>[]) => {
+      success(req, res, teams);
+    });
+  } else {
+    if (!req.body.admins) req.body.admins = [req.user._id];
+    return createTeam(req.body).then((team: InstanceType<Team>) => {
+      success(req, res, team);
+    });
+  }
+}));
+
+team.patch('/:id', catcher((req: Request, res: Response) => {
   return TeamModel.findFor(req.params.id).then((team: InstanceType<Team>) => {
     if (!team) {
       badRequest(req, res);
@@ -87,4 +97,4 @@ team.patch('/:id', (req: Request, res: Response) => {
       });
     }
   });
-});
+}));
