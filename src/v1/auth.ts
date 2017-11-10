@@ -10,7 +10,7 @@ import { getUser } from './controllers/user';
 
 import { User, UserModel } from '../models/User';
 
-enum LoginErrors {
+enum LoginError {
   INCORRECT_PASSWORD = 'INCORRECT_PASSWORD',
   NOT_FOUND = 'NOT_FOUND'
 }
@@ -28,13 +28,13 @@ passport.deserializeUser((id, done) => {
 passport.use(new LocalStrategy((username, password, done) => {
   UserModel.findOne({ username: username }).then((user: InstanceType<User>) => {
     if (!user) {
-      done(null, false, { message: LoginErrors.NOT_FOUND });
+      done(null, false, { message: LoginError.NOT_FOUND });
     } else {
       user.validPassword(password).then(valid => {
         if (valid) {
           done(null, user.clean());
         } else {
-          done(null, false, { message: LoginErrors.INCORRECT_PASSWORD });
+          done(null, false, { message: LoginError.INCORRECT_PASSWORD });
         }
       }).catch(err => {
         done(err, false);
