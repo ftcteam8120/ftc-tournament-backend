@@ -6,6 +6,15 @@ import * as bcrypt from 'bcrypt';
 import { User, UserModel } from './User';
 import { Team, TeamModel } from './Team';
 
+export class Ranking extends Typegoose {
+  @prop({ ref: Team })
+  team: Ref<Team>;
+  @prop()
+  score: number;
+  @prop()
+  ranking: number;
+}
+
 export class Event extends Typegoose {
   @prop({ required: true, unique: true, default: shortid.generate })
   shortid: string;
@@ -29,6 +38,8 @@ export class Event extends Typegoose {
   primary_color: string;
   @prop()
   secondary_color: string;
+  @arrayProp({ items: Ranking })
+  rankings: Ranking[];  
   @staticMethod
   static findFor(this: ModelType<Event> & typeof Event, id: string): mongoose.DocumentQuery<InstanceType<Event>, InstanceType<Event>> {
     if (mongoose.Types.ObjectId.isValid(id)) {
