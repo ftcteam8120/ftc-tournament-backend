@@ -4,9 +4,9 @@ import * as sinon from 'sinon';
 
 import { checkFields, requireFields } from '../src/utils/requireFields';
 
-describe('The checkFields function', function () {
-  describe('simple objects', function() {
-    it('should work normally', function () {
+describe('The checkFields function', () => {
+  describe('simple objects', () => {
+    it('should work normally', () => {
       expect(checkFields(['name', 'address'], {
         name: 'Mario',
         address: 'Peach Street',
@@ -70,7 +70,7 @@ describe('The checkFields function', function () {
 
 describe('The requireFields middleware', function () {
   describe('request handler creation', function() {
-    var mw;
+    let mw;
     beforeEach(function () {
       mw = requireFields(['test']);
     });
@@ -84,8 +84,8 @@ describe('The requireFields middleware', function () {
 
   describe('request handler calling', function() {
     it('should call next() once', function() {
-      var mw = requireFields(['test']);
-      var nextSpy = sinon.spy();
+      let mw = requireFields(['test']);
+      let nextSpy = sinon.spy();
       mw(({ body: { test: 'test' } } as any), ({} as any), nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });

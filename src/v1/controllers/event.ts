@@ -1,14 +1,12 @@
 import { Request, Response, Router } from 'express';
-import { OK, getStatusText } from 'http-status-codes';
-import { ModelType, InstanceType, Ref } from 'typegoose';
-import { success, badRequest, notFound, serverError } from '../../utils/responders';
+import { InstanceType } from 'typegoose';
+import { success, badRequest, notFound } from '../../utils/responders';
 import { catcher } from '../../utils/errorHandlers';
 import { requireFields } from '../../utils/requireFields';
-import { User, UserModel, cleanUserRef } from '../../models/User';
+import { cleanUserRef } from '../../models/User';
 import { Team, TeamModel } from '../../models/Team';
 import { Event, EventModel } from '../../models/Event';
 import { Match, MatchModel } from '../../models/Match';
-import { Types } from 'mongoose';
 
 export let event = Router();
 
@@ -29,7 +27,7 @@ event.get('/:id', catcher((req: Request, res: Response) => {
     } else {
       if (req.body.populate || req.query.populate) {
         // Clean event members and coaches if populated
-        for (var i = 0; i < event.admins.length; i++) {
+        for (let i = 0; i < event.admins.length; i++) {
           (event.admins[i] as any) = cleanUserRef(event.admins[i]).toJSON();
         }
       }
@@ -62,7 +60,7 @@ event.post('/:event_id/match',
     if (req.body.matches) {
       let promises = [];
       if ((typeof req.body.matches as any) === 'array') {
-        for (var i = 0; i < req.body.matches.lenght; i++) {
+        for (let i = 0; i < req.body.matches.lenght; i++) {
           promises.push(createMatch(event._id, req.body.matches[i]));
         }
         return Promise.all(promises).then((matches: InstanceType<Match>[]) => {
@@ -111,7 +109,7 @@ function createEvent(req, res, admins, teams) {
     logo_url: req.body.logo_url,
     primary_color: req.body.primary_color,
     secondary_color: req.body.secondary_color
-  })
+  });
   return newEvent.save().then(() => {
     success(req, res, newEvent.toJSON());
   });
@@ -126,13 +124,13 @@ event.post('/', requireFields(['name']), catcher((req: Request, res: Response) =
   if (req.body.teams) {
     // Lookup teams by shortid, ObjectId, or team number
     let promises: Promise<InstanceType<Team>>[] = [];
-    for (var i = 0; i < req.body.teams.length; i++) {
+    for (let i = 0; i < req.body.teams.length; i++) {
       promises.push(TeamModel.findFor(req.body.teams[i]).then((team) => {
         return team;
       }));
     }
     return Promise.all(promises).then((teamResults: InstanceType<Team>[]) => {
-      for (var i = 0; i < teamResults.length; i++) {
+      for (let i = 0; i < teamResults.length; i++) {
         teams.push(teamResults[i]._id);
       }
       return createEvent(req, res, admins, teams);
@@ -147,8 +145,8 @@ event.patch('/:id', catcher((req: Request, res: Response) => {
     if (!event) {
       notFound(req, res);
     } else {
-      for (var key in req.body) {
-        if (req.body[key]) {
+      for (let key in req.body) {
+        if (req.body.hasOwnProperty(key)) {
           switch (key) {
             case 'start':
               event[key] = new Date(req.body[key]);

@@ -9,7 +9,11 @@ import { Team, TeamModel } from './Team';
 // This is a subdocument of match
 class Alliance extends Typegoose {
   @prop()
+  total?: number;  
+  @prop()
   auto?: number;
+  @prop()
+  auto_b?: number;  
   @prop()
   tele?: number;
   @prop()
@@ -21,9 +25,15 @@ class Alliance extends Typegoose {
 }
 
 export enum MatchType {
-  FINAL = 'F',
-  SEMIFINAL = 'SF',
-  QUALIFYING = 'Q'
+  FINAL = 'FINAL',
+  SEMIFINAL = 'SEMIFINAL',
+  QUALIFYING = 'QUALIFYING'
+}
+
+export enum Winner {
+  RED = 'RED',
+  BLUE = 'BLUE',
+  QUALIFYING = 'QUALIFYING'
 }
 
 export class Match extends Typegoose {
@@ -31,6 +41,8 @@ export class Match extends Typegoose {
   event: Ref<Event>;
   @prop({ enum: MatchType, required: true })
   type: MatchType;
+  @prop({ enum: Winner })
+  winner: Winner;
   @prop({ required: true })
   number: number;
   // This property is only for semifinals where there are sub matches

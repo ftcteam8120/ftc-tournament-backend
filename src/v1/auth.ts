@@ -3,10 +3,8 @@ import { Request, Response, Router, NextFunction } from 'express';
 import * as passport from 'passport';
 import * as jwt from 'jsonwebtoken';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { ModelType, InstanceType } from 'typegoose';
-import { UNAUTHORIZED, getStatusText } from 'http-status-codes';
-import { success, unauthorized, serverError } from '../utils/responders';
-import { getUser } from './controllers/user';
+import { InstanceType } from 'typegoose';
+import { success, unauthorized, serverError, forbidden } from '../utils/responders';
 
 import { User, UserModel } from '../models/User';
 
@@ -97,6 +95,17 @@ export function authMiddleware(req: Request & { token: string }, res: Response, 
       unauthorized(req, res);
     }
   });
+}
+
+export function permit(...permissions: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    let count = 0;
+    for(let i = 0; i < permissions.length; i++) {
+      if (req.user.permissions.indexOf(permissions[i]) > -1) count++;
+    }
+    if (count === permissions.length) return next();
+    else forbidden(req, res);
+  };
 }
 
 export default passport;

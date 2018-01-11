@@ -39,7 +39,7 @@ export class Event extends Typegoose {
   @prop()
   secondary_color: string;
   @arrayProp({ items: Ranking })
-  rankings: Ranking[];  
+  rankings: Ranking[];
   @staticMethod
   static findFor(this: ModelType<Event> & typeof Event, id: string): mongoose.DocumentQuery<InstanceType<Event>, InstanceType<Event>> {
     if (mongoose.Types.ObjectId.isValid(id)) {

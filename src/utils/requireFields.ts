@@ -4,23 +4,25 @@ import { badRequest } from './responders';
 export function checkFields(fields: string[], data: any): string[] {
   let missing = [];
   let has = [];
-  for (var key in data) {
-    if (typeof data[key] === 'object') {
-      let subfields = [];
-      for (var i = 0; i < fields.length; i++) {
-        if (fields[i].includes(key + '.')) {
-          subfields.push(fields[i].substr(fields[i].indexOf(key) + (key as string).length + 1, fields[i].length - 1));
+  for (let key in data) {
+    if (data.hasOwnProperty(key)) {
+        if (typeof data[key] === 'object') {
+            let subfields = [];
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i].includes(key + '.')) {
+                    subfields.push(fields[i].substr(fields[i].indexOf(key) + (key as string).length + 1, fields[i].length - 1));
+                }
+            }
+            let checked = checkFields(subfields, data[key]);
+            if (checked.length != 0) {
+                for (let i = 0; i < checked.length; i++) {
+                    missing.push(key + "." + checked[i]);
+                }
+            }
+            has.push(key);
+        } else {
+            if (fields.indexOf(key) > -1) has.push(key);
         }
-      }
-      let checked = checkFields(subfields, data[key]);
-      if (checked.length != 0) {
-        for (var i = 0; i < checked.length; i++) {
-          missing.push(key + "." + checked[i]);
-        }
-      }
-      has.push(key);
-    } else {
-      if (fields.indexOf(key) > - 1) has.push(key);
     }
   }
   let result = missing.concat(fields.filter(x => {
@@ -37,7 +39,7 @@ export function requireFields(fields: string[], multiName?: string): (req: Reque
         console.log(req.body[multiName]);
         console.log(Array.isArray(req.body[multiName]));
         if (Array.isArray(req.body[multiName])) {
-          for (var i = 0; i < req.body[multiName].length; i++) {
+          for (let i = 0; i < req.body[multiName].length; i++) {
             let check = checkFields(fields, req.body[multiName][i]);
             if (check.length > 0) {
               return badRequest(req, res, check, { atIndex: i });

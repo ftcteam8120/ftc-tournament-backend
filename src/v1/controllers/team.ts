@@ -1,12 +1,10 @@
 import { Request, Response, Router } from 'express';
-import { OK, getStatusText } from 'http-status-codes';
-import { ModelType, InstanceType, Ref } from 'typegoose';
+import { InstanceType } from 'typegoose';
 import { success, badRequest, notFound } from '../../utils/responders';
 import { catcher } from '../../utils/errorHandlers';
 import { requireFields } from '../../utils/requireFields';
-import { User, UserModel, cleanUserRef } from '../../models/User';
+import { cleanUserRef } from '../../models/User';
 import { Team, TeamModel } from '../../models/Team';
-import { Types } from 'mongoose';
 
 export let team = Router();
 
@@ -27,10 +25,10 @@ team.get('/:id', catcher((req: Request, res: Response) => {
     } else {
       if (req.body.populate || req.query.populate) {
         // Clean team members and coaches if populated
-        for (var i = 0; i < team.coaches.length; i++) {
+        for (let i = 0; i < team.coaches.length; i++) {
           (team.coaches[i] as any) = cleanUserRef(team.coaches[i]).toJSON();
         }
-        for (var i = 0; i < team.members.length; i++) {
+        for (let i = 0; i < team.members.length; i++) {
           (team.members[i] as any) = cleanUserRef(team.members[i]).toJSON();
         }
       }
@@ -62,7 +60,7 @@ function createTeam(data) {
 team.post('/', requireFields(['name', 'number'], 'teams'), catcher((req: Request, res: Response) => {
   if (req.body.teams) {
     let promises = [];
-    for (var i = 0; i < req.body.teams.length; i++) {
+    for (let i = 0; i < req.body.teams.length; i++) {
       promises.push(createTeam(req.body.teams[i]));
     }
     return Promise.all(promises).then((teams: InstanceType<Team>[]) => {
@@ -81,8 +79,8 @@ team.patch('/:id', catcher((req: Request, res: Response) => {
     if (!team) {
       badRequest(req, res);
     } else {
-      for (var key in req.body) {
-        if (req.body[key]) {
+      for (let key in req.body) {
+        if (req.body.hasOwnProperty(key)) {
           switch (key) {
             case 'number':
               team[key] = Number(req.body[key]);

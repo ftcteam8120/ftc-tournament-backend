@@ -21,7 +21,13 @@ export class Team extends Typegoose {
   @prop({ required: true })
   number: number;
   @prop()
-  location?: string;
+  school?: string;
+  @prop()
+  city?: string;
+  @prop()
+  state?: string;
+  @prop()
+  country?: string;
   @prop()
   photo_url?: string;
   @instanceMethod

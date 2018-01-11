@@ -1,5 +1,7 @@
 import { Response, Request } from 'express';
-import { OK, INTERNAL_SERVER_ERROR, getStatusText, UNAUTHORIZED, BAD_REQUEST, NOT_FOUND } from 'http-status-codes';
+import {
+    OK, INTERNAL_SERVER_ERROR, getStatusText, UNAUTHORIZED, BAD_REQUEST, NOT_FOUND, FORBIDDEN
+} from 'http-status-codes';
 
 interface JSONData {
   success: boolean;
@@ -43,6 +45,18 @@ export function unauthorized(req: Request, res: Response, error?: any, metadata?
     error
   };
   res.status(UNAUTHORIZED).json(json);
+}
+
+export function forbidden(req: Request, res: Response, error?: any, metadata?: any): void {
+    let json: JSONData = {
+        success: false,
+        url: req.originalUrl,
+        code: FORBIDDEN,
+        message: getStatusText(FORBIDDEN),
+        ...metadata,
+        error
+    };
+    res.status(FORBIDDEN).json(json);
 }
 
 export function badRequest(req: Request, res: Response, missingFields?: string[], metadata?: any): void {

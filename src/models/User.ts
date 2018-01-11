@@ -87,6 +87,8 @@ export class User extends Typegoose {
   refreshToken?: string;
   @prop()
   profile: Profile;
+  //@arrayProp({})
+  //permissions: string[];
   cleaned: boolean;
   @instanceMethod
   validPassword(this: InstanceType<User>, candidatePassword: string): Promise<boolean> {
