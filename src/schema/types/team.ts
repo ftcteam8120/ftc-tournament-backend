@@ -4,6 +4,14 @@ import {
 } from '../../actions';
 
 export const teamType = `
+  input SyncTeamInput {
+    number: Int!
+    name: String
+    school: String
+    city: String
+    state: String
+    country: String
+  }
   input AddTeamInput {
     shortid: String
     coaches: [String]

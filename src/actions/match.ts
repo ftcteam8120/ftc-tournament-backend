@@ -4,7 +4,7 @@ import { MatchModel, Match } from '../models/Match';
 import actionProcessor from '../utils/actionProcessor';
 
 export async function findMatchesForEvent(eventId) {
-  return MatchModel.find({ event: eventId }).then((matches: InstanceType<Match>[]) => {
+  return MatchModel.find({ event: eventId }).sort({ number: 1 }).then((matches: InstanceType<Match>[]) => {
     const matchObjs = [];
     for (let i = 0; i < matches.length; i++) {
       matchObjs.push(actionProcessor(matches[i]));

@@ -33,7 +33,7 @@ export enum MatchType {
 export enum Winner {
   RED = 'RED',
   BLUE = 'BLUE',
-  QUALIFYING = 'QUALIFYING'
+  TIE = 'TIE'
 }
 
 export class Match extends Typegoose {
@@ -51,7 +51,7 @@ export class Match extends Typegoose {
   @prop()
   red_alliance: Alliance;
   @prop()
-  blue_alliace: Alliance;
+  blue_alliance: Alliance;
 }
 
 export const MatchModel = new Match().getModelForClass(Match);

@@ -10,9 +10,15 @@ export class Ranking extends Typegoose {
   @prop({ ref: Team })
   team: Ref<Team>;
   @prop()
-  score: number;
+  ranking_points: number;
   @prop()
-  ranking: number;
+  qualifying_points: number;
+  @prop()
+  highest: number;
+  @prop()
+  rank: number;
+  @prop()
+  matches: number;
 }
 
 export class Event extends Typegoose {

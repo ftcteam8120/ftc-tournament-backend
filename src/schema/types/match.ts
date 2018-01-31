@@ -4,9 +4,23 @@ import {
 } from '../../actions';
 
 export const matchType = `
-  input UpdateScoresInput {
-    red_alliance: AllianceInput
-    blue_alliance: AllianceInput
+  input SyncAllianceInput {
+    teams: [Int]
+    total: Int
+    auto: Int
+    auto_b: Int
+    tele: Int
+    end: Int
+    penalty: Int
+  }
+  input SyncMatchInput {
+    number: Int!
+    winner: Winner
+    type: MatchType
+    number: Int
+    sub: Int
+    red_alliance: SyncAllianceInput
+    blue_alliance: SyncAllianceInput
   }
   input AllianceInput {
     total: Int
@@ -37,6 +51,7 @@ export const matchType = `
   enum Winner {
     RED
     BLUE
+    TIE
   }
   enum MatchType {
     FINAL

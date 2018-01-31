@@ -18,15 +18,28 @@ export const eventType = `
     secondary_color: String
     rankings: [CreateRankingInput]
   }
+  input SyncRankingInput {
+    team: Int
+    ranking_points: Int
+    qualifying_points: Int
+    highest: Int
+    rank: Int
+    matches: Int
+  }
   input CreateRankingInput {
     team: String!
-    score: Int
-    ranking: Int
+    ranking_points: Int
+    qualifying_points: Int
+    highest: Int
+    rank: Int
+    matches: Int
   }
   type Ranking {
     team: Team
-    score: Int
-    ranking: Int
+    ranking_points: Int
+    qualifying_points: Int
+    highest: Int
+    rank: Int
   }
   type Event implements Node {
     id: String!
