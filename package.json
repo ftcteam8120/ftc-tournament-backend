@@ -39,6 +39,7 @@
     "webpack": "3"
   },
   "dependencies": {
+    "apollo-link": "^1.0.7",
     "apollo-server-express": "^1.2.0",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
