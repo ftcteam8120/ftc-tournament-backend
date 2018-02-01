@@ -5,8 +5,7 @@ import {
   updateMatchScores,
   syncTeamsWithEvent,
   syncMatchesWithEvent,
-  syncRankingsWithEvent,
-  syncMatchResultsWithEvent
+  syncRankingsWithEvent
 } from '../actions';
 
 export const rootMutation = `
@@ -16,7 +15,6 @@ export const rootMutation = `
     syncTeamsWithEvent(event: String!, teams: [SyncTeamInput]): [Team]
     syncMatchesWithEvent(event: String!, matches: [SyncMatchInput]): [Match]
     syncRankingsWithEvent(event: String!, rankings: [SyncRankingInput]): Event
-    syncMatchResultsWithEvent(event: String!, results: [SyncMatchInput]): [Match]
     addMatchToEvent(event: String!, input: AddMatchInput!): Match
   }
 `;
@@ -33,9 +31,6 @@ export const rootMutationResolvers = {
   },
   async syncRankingsWithEvent(baseObj, { event, rankings }) {
     return syncRankingsWithEvent(event, rankings);
-  },
-  async syncMatchResultsWithEvent(baseObj, { event, results }) {
-    return syncMatchResultsWithEvent(event, results);
   },
   async addTeamToEvent(baseObj, { event, input }) {
     return addTeamToEvent(event, input);

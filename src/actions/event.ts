@@ -114,7 +114,7 @@ async function getTeamIdsForMatch(data: any): Promise<{ red_teams: any, blue_tea
   });
 }
 
-export async function syncMatchesWithEvent(eventId: string, data: any[]) {
+/*export async function syncMatchesWithEvent(eventId: string, data: any[]) {
   return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
     if (!event) throw new Error('Event not found');
     let promises = [];
@@ -157,7 +157,7 @@ export async function syncMatchesWithEvent(eventId: string, data: any[]) {
       });
     });
   });
-}
+}*/
 
 export async function syncRankingsWithEvent(eventId: string, data: any[]) {
   return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
@@ -179,27 +179,51 @@ export async function syncRankingsWithEvent(eventId: string, data: any[]) {
   });
 }
 
-export async function syncMatchResultsWithEvent(eventId: string, data: any[]) {
+export async function syncMatchesWithEvent(eventId: string, data: any[]) {
   return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
     if (!event) throw new Error('Event not found');
     let promises = [];
     let update_promises = [];
     let results = [];
     data.forEach((value) => {
-      promises.push(MatchModel.findOne({ event: eventId, number: value.number }));
+      promises.push(MatchModel.findOne({ event: eventId, number: value.number, type: value.type, sub: value.sub }));
     });
     return Promise.all(promises).then((matches: InstanceType<Match>[]) => {
       for (let i = 0; i < data.length; i++) {
-        matches[i].winner = data[i].winner || matches[i].winner;
-        matches[i].red_alliance = {
-          ...matches[i].red_alliance,
-          ...data[i].red_alliance
-        };
-        matches[i].blue_alliance = {
-          ...matches[i].blue_alliance,
-          ...data[i].blue_alliance
-        };
-        update_promises.push(matches[i].save());
+        if (matches[i]) {
+          update_promises.push(getTeamIdsForMatch(data[i]).then((ids) => {
+            matches[i].winner = data[i].winner || matches[i].winner;
+            matches[i].red_alliance = {
+              ...matches[i].red_alliance,
+              ...data[i].red_alliance,
+              teams: ids.red_teams
+            };
+            matches[i].blue_alliance = {
+              ...matches[i].blue_alliance,
+              ...data[i].blue_alliance,
+              teams: ids.blue_teams
+            };
+            return matches[i].save();
+          }));
+        } else {
+          update_promises.push(getTeamIdsForMatch(data[i]).then((ids) => {
+            return new MatchModel({
+              number: data[i].number,
+              winner: data[i].winner,
+              sub: data[i].sub,
+              type: data[i].type,
+              event: eventId,
+              red_alliance: {
+                ...data[i].red_alliance,
+                teams: ids.red_teams
+              },
+              blue_alliance: {
+                ...data[i].blue_alliance,
+                teams: ids.blue_teams
+              }
+            }).save();
+          }));
+        }
       }
       return Promise.all(update_promises).then((updatedMatches: InstanceType<Match>[]) => {
         updatedMatches.forEach((value) => {
@@ -208,5 +232,15 @@ export async function syncMatchResultsWithEvent(eventId: string, data: any[]) {
         return results;
       });
     });
+  });
+}
+
+export async function findEventsForAdmin(adminId: string) {
+  return EventModel.find({ admins: adminId }).then((events: InstanceType<Event>[]) => {
+    let results = [];
+    for (let i = 0; i < events.length; i++) {
+      results.push(actionProcessor(events[i]));
+    }
+    return results;
   });
 }
