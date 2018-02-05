@@ -1,18 +1,17 @@
-# Pull from latest PM2 image
-FROM keymetrics/pm2:latest
+FROM node:8.9-wheezy
 
-# Set default api port to 8081
-ENV PORT 8081
+# Set default api port to 80
+ENV PORT 80
 
 # Set NODE_ENV to production
 ENV NODE_ENV production
 ENV NPM_CONFIG_LOGLEVEL info
 
 # Set the database server and secret
-ENV MONGO_URI mongodb://server:robotics@ds243335.mlab.com:43335/ftc-tournament-server
-ENV SECRET very_secret
+ENV MONGO_URI mongodb://admin:yGr0y63IdMWQ0fP1@ftc-tournament-server-test-shard-00-00-0pe2a.mongodb.net:27017,ftc-tournament-server-test-shard-00-01-0pe2a.mongodb.net:27017,ftc-tournament-server-test-shard-00-02-0pe2a.mongodb.net:27017/test?ssl=true&replicaSet=ftc-tournament-server-test-shard-0&authSource=admin
+ENV SECRET 491234kjsadfhjkfdsahkj23489234khjafsd234
 
-# Copy package.json adn yarn.lock
+# Copy package.json and yarn.lock
 COPY package.json /build/
 COPY yarn.lock /build/
 
@@ -23,12 +22,9 @@ WORKDIR /build
 COPY /build build
 
 # Install node modules
-RUN npm install --production
-
-# Copy the PM2 config
-COPY pm2.json .
+RUN yarn install
 
 # Expose the external port
-EXPOSE 8081
+EXPOSE 80
 
-CMD [ "pm2-docker", "start", "pm2.json" ]
+CMD [ "node", "./build/index" ]
