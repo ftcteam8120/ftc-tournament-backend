@@ -1,6 +1,7 @@
 import {
   findEventById,
-  findTeams
+  findTeams,
+  findWinningAllianceForMatch
 } from '../../actions';
 
 export const matchType = `
@@ -65,6 +66,7 @@ export const matchType = `
     type: MatchType
     number: Int
     sub: Int
+    winning_alliance: Alliance
     red_alliance: Alliance
     blue_alliance: Alliance
   }
@@ -73,6 +75,9 @@ export const matchType = `
 export const matchResolvers = {
   async event(baseObj) {
     return findEventById(baseObj.event);
+  },
+  async winning_alliance(baseObj) {
+    return findWinningAllianceForMatch(baseObj)
   }
 }
 

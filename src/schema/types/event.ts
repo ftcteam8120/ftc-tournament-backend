@@ -1,8 +1,9 @@
 import {
   findTeams,
-  findTeamById,
+  findTeam,
   findUsers,
-  findMatchesForEvent
+  findMatchesForEvent,
+  sortRankings
 } from '../../actions';
 
 export const eventType = `
@@ -41,6 +42,17 @@ export const eventType = `
     highest: Int
     rank: Int
   }
+  input RankingsOrder {
+    rank: Order
+    ranking_points: Order
+    qualifying_points: Order
+    highest: Order
+  }
+  input MatchesOrder {
+    number: Order
+    type: Order
+    sub: Order
+  }
   type Event implements Node {
     id: String!
     shortid: String
@@ -54,7 +66,9 @@ export const eventType = `
     primary_color: String
     secondary_color: String
     rankings: [Ranking]
+    rankings(orderBy: RankingsOrder): [Ranking]
     matches: [Match]
+    matches(type: MatchType, winner: Winner, team: String, orderBy: MatchesOrder): [Match]
   }
 `
 
@@ -65,13 +79,16 @@ export const eventResolvers = {
   async teams(baseObj) {
     return findTeams(baseObj.teams);
   },
-  async matches(baseObj) {
-    return findMatchesForEvent(baseObj.id);
+  async matches(baseObj, query) {
+    return findMatchesForEvent(baseObj.id, query);
+  },
+  rankings(baseObj, { orderBy }) {
+    return sortRankings(baseObj, orderBy);
   }
 }
 
 export const rankingResolvers = {
   async team(baseObj) {
-    return findTeamById(baseObj.team);
+    return findTeam(baseObj.team);
   }
 }

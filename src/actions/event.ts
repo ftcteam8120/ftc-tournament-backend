@@ -1,12 +1,24 @@
 import { InstanceType } from 'typegoose';
+import { Types } from 'mongoose';
 import { EventModel, Event } from '../models/Event';
 import { Team, TeamModel } from '../models/Team';
 import actionProcessor from '../utils/actionProcessor';
 import { Match, MatchType } from '../models/Match';
 import MatchModel from '../models/Match';
+import { Order } from '../schema/typeDefs';
+import * as shortid from 'shortid';
+import * as _ from 'lodash';
 
 export async function findEventById(id: string) {
-  return EventModel.findById(id).then((event: InstanceType<Event>) => {
+  let query;
+  if (Types.ObjectId.isValid(id)) {
+    query = { _id: id };
+  } else if (shortid.isValid(id)) {
+    query = { shortid: id };
+  } else {
+    throw new Error('Invalid Event ID');
+  }
+  return EventModel.findOne(query).then((event: InstanceType<Event>) => {
     return actionProcessor(event);
   });
 }
@@ -243,4 +255,32 @@ export async function findEventsForAdmin(adminId: string) {
     }
     return results;
   });
+}
+
+function sortRankingsAsc(a, b) {
+  if (a.last_nom < b.last_nom)
+      return -1;
+    if (a.last_nom > b.last_nom)
+      return 1;
+    return 0;
+}
+
+export function sortRankings(baseObj, orderBy) {
+  let iteratees = [];
+  let orders = [];
+  if (orderBy) {
+    Object.keys(orderBy).forEach((key) => {
+      if (orderBy[key]) {
+        iteratees.push(key);
+        if (orderBy[key] === Order.DESC) {
+          orders.push('desc');
+        } else {
+          orders.push('asc');
+        }
+      }
+    });
+    return _.orderBy(baseObj.rankings, iteratees, orders);
+  } else {
+    return _.orderBy(baseObj.rankings, ['rank'], ['asc']);
+  }
 }

@@ -1,15 +1,53 @@
 import { InstanceType } from 'typegoose';
 import { EventModel, Event } from '../models/Event';
-import { MatchModel, Match } from '../models/Match';
+import { MatchModel, Match, Winner } from '../models/Match';
+import { findTeam } from './';
+import { Order } from '../schema/typeDefs';
 import actionProcessor from '../utils/actionProcessor';
 
-export async function findMatchesForEvent(eventId) {
-  return MatchModel.find({ event: eventId }).sort({ number: 1 }).then((matches: InstanceType<Match>[]) => {
-    const matchObjs = [];
-    for (let i = 0; i < matches.length; i++) {
-      matchObjs.push(actionProcessor(matches[i]));
+async function getTeamQuery(query) {
+  if (query.team) {
+    return findTeam(query.team).then((team) => {
+      return {
+        $or: [
+          { 'blue_alliance.teams': team.id },
+          { 'red_alliance.teams': team.id }
+        ]
+      }
+    }).catch(() => {
+      throw new Error('Team Not Found');
+    });
+  } else {
+    return Promise.resolve(null);
+  }
+}
+
+export async function findMatchesForEvent(eventId: string, query: { type?: string, winner?: string, team?: string, orderBy: any }) {
+  return getTeamQuery(query).then((teamQuery) => {
+    delete query.team;
+    let order = query.orderBy;
+    let sort;
+    if (order) {
+      sort = {};
+      delete query.orderBy;
+      Object.keys(order).forEach((key) => {
+        if (order[key] === Order.ASC) {
+          sort[key] = 1;
+        } else {
+          sort[key] = -1;
+        }
+      });
+    } else {
+      sort = { number: 1, sub: 1 };
     }
-    return matchObjs;
+    let q = { event: eventId, ...query, ...teamQuery };
+    return MatchModel.find(q).sort(sort).then((matches: InstanceType<Match>[]) => {
+      const matchObjs = [];
+      for (let i = 0; i < matches.length; i++) {
+        matchObjs.push(actionProcessor(matches[i]));
+      }
+      return matchObjs;
+    });
   });
 }
 
@@ -30,4 +68,15 @@ export async function updateMatchScores(eventId: string, matchNumber: number, ma
       return updatedMatch.save();
     });
   });
+}
+
+export async function findWinningAllianceForMatch(baseObj: any) {
+  switch (baseObj.winner) {
+    case Winner.BLUE:
+      return baseObj.blue_alliance;
+    case Winner.RED:
+      return baseObj.red_alliance;
+    default:
+      return null;  
+  }
 }

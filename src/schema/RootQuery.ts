@@ -1,7 +1,7 @@
 import {
   findEventById,
   findEvents,
-  findTeamById,
+  findTeam,
   findTeams,
   findEventsForAdmin
 } from '../actions';
@@ -10,7 +10,7 @@ export const rootQuery = `
   type Query {
     event(id: String!): Event
     findEventsForAdmin(admin: String!): [Event]
-    team(id: String!): Team
+    team(id: String, number: Int): Team
     events: [Event]
     teams: [Team]
   }
@@ -20,8 +20,8 @@ export const rootQueryResolvers = {
   async event(baseObj, { id }) {
     return await findEventById(id);
   },
-  async team(baseObj, { id }) {
-    return await findTeamById(id);
+  async team(baseObj, { id, number }) {
+    return await findTeam(id || number);
   },
   async events() {
     return await findEvents();

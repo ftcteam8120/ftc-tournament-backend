@@ -1,9 +1,23 @@
 import { InstanceType } from 'typegoose';
+import { Types } from 'mongoose';
+import * as shortid from 'shortid';
 import { TeamModel, Team } from '../models/Team';
 import actionProcessor from '../utils/actionProcessor';
 
-export async function findTeamById(id: string) {
-  return TeamModel.findById(id).then((team: InstanceType<Team>) => {
+export async function findTeam(id: string | number) {
+  let query;
+  if ((typeof id) === 'number') {
+    query = { number: id };
+  } else {
+    if (Types.ObjectId.isValid(id)) {
+      query = { _id: id };
+    } else if (shortid.isValid(id)) {
+      query = { shortid: id };
+    } else {
+      throw new Error('Invalid Team ID');
+    }
+  }
+  return TeamModel.findOne(query).then((team: InstanceType<Team>) => {
     return actionProcessor(team);
   });
 }
