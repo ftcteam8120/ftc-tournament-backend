@@ -8,9 +8,9 @@ import * as bearerToken from 'express-bearer-token';
 import * as shortid from 'shortid';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import { errorHandler, errorLogger } from './utils/errorHandlers';
-
-// Set shortid characters
-shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
+import { createServer } from 'http';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
 
 if (process.env.NODE_ENV != 'production') {
   dotenv.config();
@@ -44,11 +44,47 @@ import { apiv1 } from './v1/index';
 
 app.use('/v1', apiv1);
 
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
+import { graphqlAuth, websocketAuth } from './v1/auth';
+
+app.use('/graphql', bodyParser.json(), graphqlAuth, (req, res, next) => {
+  graphqlExpress({ schema, context: { user: req.user } })(req, res, next);
+});
+
 if (process.env.NODE_ENV !== 'production') {
   app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 }
 
 app.listen(process.env.PORT, () => {
   logger.info('Server running on port', process.env.PORT);
+});
+
+// Create WebSocket listener server
+const websocketServer = createServer((request, response) => {
+  response.writeHead(404);
+  response.end();
+});
+
+const subscriptionServer = SubscriptionServer.create(
+  {
+    schema,
+    execute,
+    subscribe,
+    onConnect: (connectionParams, webSocket) => {
+      if (connectionParams.Authorization) {
+        return websocketAuth(connectionParams.Authorization).then((user) => {
+            return {
+              user: user
+            };
+        });
+      }
+    }
+  },
+  {
+    server: websocketServer,
+    path: '/graphql',
+  },
+);
+
+websocketServer.listen(process.env.WS_PORT, () => {
+  logger.info('Websocket server running on port', process.env.WS_PORT);
 });

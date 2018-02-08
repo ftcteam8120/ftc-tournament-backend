@@ -6,6 +6,38 @@ import * as bcrypt from 'bcrypt';
 import { User, UserModel } from './User';
 import { Team, TeamModel } from './Team';
 
+export enum SponsorType {
+  PRIMARY = 'PRIMARY',
+  SECONDARY = 'SECONDARY'
+}
+
+export class Sponsor extends Typegoose {
+  @prop()
+  name: string;
+  @prop()
+  logo_url: string;
+  @prop({ enum: SponsorType })
+  type: SponsorType;
+}
+
+export class Coordinates extends Typegoose {
+  @prop()
+  lat: number;
+  @prop()
+  lng: number;
+}
+
+export class Location extends Typegoose {
+  @prop()
+  address: string;
+  @prop()
+  description: string;
+  @prop()
+  place_id: string;
+  @prop()
+  coordinates: Coordinates;
+}
+
 export class Ranking extends Typegoose {
   @prop({ ref: Team })
   team: Ref<Team>;
@@ -33,11 +65,15 @@ export class Event extends Typegoose {
   @prop({ required: true })
   name: string;
   @prop()
-  location: string;
+  description: string;  
+  @prop()
+  location: Location;
   @prop()
   start?: Date;
   @prop()
   end?: Date;
+  @arrayProp({ items: Sponsor })
+  sponsors?: Sponsor[];
   @prop()
   logo_url?: string;
   @prop()

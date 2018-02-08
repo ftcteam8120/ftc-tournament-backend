@@ -16,7 +16,7 @@ export async function findEventById(id: string) {
   } else if (shortid.isValid(id)) {
     query = { shortid: id };
   } else {
-    throw new Error('Invalid Event ID');
+    return Promise.reject(new Error('Invalid Event ID'));
   }
   return EventModel.findOne(query).then((event: InstanceType<Event>) => {
     return actionProcessor(event);
@@ -24,7 +24,7 @@ export async function findEventById(id: string) {
 }
 
 export async function findEvents() {
-  return EventModel.find().then((events: InstanceType<Event>[]) => {
+  return EventModel.find().sort({ start: -1 }).then((events: InstanceType<Event>[]) => {
     const eventObjs = [];
     for (let i = 0; i < events.length; i++) {
       eventObjs.push(actionProcessor(events[i]));

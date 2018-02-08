@@ -8,11 +8,15 @@ import { teamResolvers } from './types/team';
 import { userResolvers } from './types/user';
 import { matchResolvers, allianceResolvers } from './types/match';
 
+// Custom scalar values
+import { dateScalarResolver } from './dateScalar';
+
 export default {
   Mutation: rootMutationResolvers,
   Query: rootQueryResolvers,
   Event: eventResolvers,
   Ranking: rankingResolvers,
+  Date: dateScalarResolver,
   Team: teamResolvers,
   User: userResolvers,
   Match: matchResolvers,

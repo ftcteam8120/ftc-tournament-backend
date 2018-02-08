@@ -42,6 +42,25 @@ export const eventType = `
     highest: Int
     rank: Int
   }
+  type Coordinates {
+    lat: Float
+    lng: Float
+  }
+  type Location {
+    address: String
+    description: String
+    place_id: String
+    coordinates: Coordinates
+  }
+  enum SponsorType {
+    PRIMARY
+    SECONDARY
+  }
+  type Sponsor {
+    name: String
+    logo_url: String
+    type: SponsorType
+  }
   input RankingsOrder {
     rank: Order
     ranking_points: Order
@@ -60,8 +79,11 @@ export const eventType = `
     teams: [Team]
     current_round: Int
     name: String!
-    start: String
-    end: String
+    location: Location
+    description: String
+    start: Date
+    end: Date
+    sponsors: [Sponsor]
     logo_url: String
     primary_color: String
     secondary_color: String

@@ -97,6 +97,40 @@ export function authMiddleware(req: Request & { token: string }, res: Response, 
   });
 }
 
+export function graphqlAuth(req: Request & { token: string }, res: Response, next: NextFunction) {
+  jwt.verify(req.token, process.env.SECRET, (err: Error, decoded: any) => {
+    if (!err) {
+      UserModel.findById(decoded.id, (err, user: InstanceType<User>) => {
+        if (user) {
+          req.user = user.clean();
+        }
+        next();
+      }).catch((error) => {
+        next(error);
+      });
+    } else {
+      req.user = null;
+      next();
+    }
+  });
+}
+
+export async function websocketAuth(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, process.env.SECRET, (err: Error, decoded: any) => {
+      if (!err) {
+        return UserModel.findById(decoded.id, (err, user: InstanceType<User>) => {
+          resolve(user.clean());
+        }).catch((error) => {
+          reject(error);
+        });
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
 export function permit(...permissions: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     let count = 0;

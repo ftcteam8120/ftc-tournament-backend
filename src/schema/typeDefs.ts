@@ -11,6 +11,7 @@ export enum Order {
 }
 
 const nodeInterface = `
+  scalar Date
   interface Node {
     id: String!
     shortid: String

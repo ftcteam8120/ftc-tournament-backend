@@ -14,7 +14,7 @@ export async function findTeam(id: string | number) {
     } else if (shortid.isValid(id)) {
       query = { shortid: id };
     } else {
-      throw new Error('Invalid Team ID');
+      return Promise.reject(new Error('Invalid Team ID'));
     }
   }
   return TeamModel.findOne(query).then((team: InstanceType<Team>) => {
