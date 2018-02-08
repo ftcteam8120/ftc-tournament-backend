@@ -3,6 +3,7 @@ import * as shortid from 'shortid';
 import { prop, arrayProp, pre, staticMethod, instanceMethod, Typegoose, ModelType, InstanceType, Ref } from 'typegoose';
 import * as bcrypt from 'bcrypt';
 
+import { Location } from './Location';
 import { User, UserModel } from './User';
 import { Team, TeamModel } from './Team';
 
@@ -18,24 +19,6 @@ export class Sponsor extends Typegoose {
   logo_url: string;
   @prop({ enum: SponsorType })
   type: SponsorType;
-}
-
-export class Coordinates extends Typegoose {
-  @prop()
-  lat: number;
-  @prop()
-  lng: number;
-}
-
-export class Location extends Typegoose {
-  @prop()
-  address: string;
-  @prop()
-  description: string;
-  @prop()
-  place_id: string;
-  @prop()
-  coordinates: Coordinates;
 }
 
 export class Ranking extends Typegoose {

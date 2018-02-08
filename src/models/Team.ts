@@ -4,6 +4,7 @@ import { prop, arrayProp, pre, staticMethod, instanceMethod, Typegoose, ModelTyp
 import * as bcrypt from 'bcrypt';
 
 import { User, UserModel } from './User';
+import { Location } from './Location';
 
 export class Team extends Typegoose {
   @prop({ required: true, unique: true, default: shortid.generate })
@@ -21,7 +22,9 @@ export class Team extends Typegoose {
   @prop({ required: true })
   number: number;
   @prop()
-  school?: string;
+  affiliation?: string;
+  @prop()
+  location?: Location;  
   @prop()
   city?: string;
   @prop()
@@ -30,6 +33,8 @@ export class Team extends Typegoose {
   country?: string;
   @prop()
   photo_url?: string;
+  @prop()
+  year?: number;
   @instanceMethod
   getMembers(this: InstanceType<Team>):Promise<InstanceType<User>[]> {
     return new Promise((resolve, reject) => {

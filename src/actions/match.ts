@@ -5,6 +5,12 @@ import { findTeam } from './';
 import { Order } from '../schema/typeDefs';
 import actionProcessor from '../utils/actionProcessor';
 
+export async function findMatchById(id: string) {
+  return MatchModel.findById(id).then((match: InstanceType<Match>) => {
+    return actionProcessor(match);
+  });
+}
+
 async function getTeamQuery(query) {
   if (query.team) {
     return findTeam(query.team).then((team) => {

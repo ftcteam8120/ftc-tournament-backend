@@ -35,7 +35,8 @@ export const teamType = `
     biography: String
     name: String!
     number: Int!
-    school: String
+    affiliation: String
+    location: Location
     city: String
     state: String
     country: String
