@@ -44,7 +44,7 @@ export async function findTeams(teams?: any[]) {
 }
 
 export async function findTeamsForUser(id: string) {
-  return TeamModel.find({ coaches: [id], members: [id] })
+  return TeamModel.find().or([{ coaches: [id] }, { members: [id] }])
     .then((teams: InstanceType<Team>[]) => {
       const promises = [];
       for (let i = 0; i < teams.length; i++) {

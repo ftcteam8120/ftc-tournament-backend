@@ -6,6 +6,9 @@ import {
   sortRankings
 } from '../../actions';
 
+import { requireScopes } from '../../utils/requireScopes';
+import { Scopes } from '../../v1/scopes';
+
 export const eventType = `
   input CreateEventInput {
     admins: [String]
@@ -95,22 +98,27 @@ export const eventType = `
 `
 
 export const eventResolvers = {
-  async admins(baseObj) {
+  async admins(baseObj, {}, context) {
+    if (!requireScopes(context.scopes, Scopes.Users.READ)) throw new Error('Unauthorized');
     return findUsers(baseObj.admins);
   },
-  async teams(baseObj) {
+  async teams(baseObj, { }, context) {
+    if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
     return findTeams(baseObj.teams);
   },
-  async matches(baseObj, query) {
+  async matches(baseObj, query, context) {
+    if (!requireScopes(context.scopes, Scopes.Matches.READ)) throw new Error('Unauthorized');
     return findMatchesForEvent(baseObj.id, query);
   },
-  rankings(baseObj, { orderBy }) {
+  rankings(baseObj, { orderBy }, context) {
+    if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
     return sortRankings(baseObj, orderBy);
   }
 }
 
 export const rankingResolvers = {
-  async team(baseObj) {
+  async team(baseObj, {}, context) {
+    if (!requireScopes(context.scopes, Scopes.Matches.READ)) throw new Error('Unauthorized');
     return findTeam(baseObj.team);
   }
 }

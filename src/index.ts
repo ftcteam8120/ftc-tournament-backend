@@ -41,13 +41,20 @@ app.use(errorHandler);
 import schema from './schema';
 
 import { apiv1 } from './v1/index';
+import { Scopes, defaultScopes } from './v1/scopes';
 
 app.use('/v1', apiv1);
 
 import { graphqlAuth, websocketAuth } from './v1/auth';
 
-app.use('/graphql', bodyParser.json(), graphqlAuth, (req, res, next) => {
-  graphqlExpress({ schema, context: { user: req.user } })(req, res, next);
+app.use('/graphql', bodyParser.json(), graphqlAuth, (req: any, res, next) => {
+  let scopes;
+  if (req.scopes) {
+    scopes = req.scopes;
+  } else {
+    scopes = defaultScopes;
+  }
+  graphqlExpress({ schema, context: { user: req.user, scopes } })(req, res, next);
 });
 
 if (process.env.NODE_ENV !== 'production') {

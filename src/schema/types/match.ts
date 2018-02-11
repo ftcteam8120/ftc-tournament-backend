@@ -4,6 +4,9 @@ import {
   findWinningAllianceForMatch
 } from '../../actions';
 
+import { requireScopes } from '../../utils/requireScopes';
+import { Scopes } from '../../v1/scopes';
+
 export const matchType = `
   input SyncAllianceInput {
     teams: [Int]
@@ -73,16 +76,18 @@ export const matchType = `
 `
 
 export const matchResolvers = {
-  async event(baseObj) {
+  async event(baseObj, {}, context) {
+    if (!requireScopes(context.scopes, Scopes.Events.READ)) throw new Error('Unauthorized');
     return findEventById(baseObj.event);
   },
-  async winning_alliance(baseObj) {
+  async winning_alliance(baseObj, {}, context) {
     return findWinningAllianceForMatch(baseObj)
   }
 }
 
 export const allianceResolvers = {
-  async teams(baseObj) {
+  async teams(baseObj, {}, context) {
+    if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
     return findTeams(baseObj.teams);
   }
 }

@@ -7,6 +7,7 @@ import { InstanceType } from 'typegoose';
 import { success, unauthorized, serverError, forbidden } from '../utils/responders';
 
 import { User, UserModel } from '../models/User';
+import { Scopes, defaultScopes } from './scopes';
 
 enum LoginError {
   INCORRECT_PASSWORD = 'INCORRECT_PASSWORD',
@@ -78,7 +79,8 @@ auth.post('/login', (req: Request, res: Response, next: NextFunction) => {
 function generateJWT(user: InstanceType<User>) {
   return jwt.sign({
     id: user._id,
-    username: user.username
+    username: user.username,
+    scopes: user.scopes + ' ' + defaultScopes + ' ' + Scopes.Users.READ
   }, process.env.SECRET, { expiresIn: '1d' });
 }
 
@@ -97,12 +99,13 @@ export function authMiddleware(req: Request & { token: string }, res: Response, 
   });
 }
 
-export function graphqlAuth(req: Request & { token: string }, res: Response, next: NextFunction) {
+export function graphqlAuth(req: Request & { token: string, scopes: string }, res: Response, next: NextFunction) {
   jwt.verify(req.token, process.env.SECRET, (err: Error, decoded: any) => {
     if (!err) {
       UserModel.findById(decoded.id, (err, user: InstanceType<User>) => {
         if (user) {
           req.user = user.clean();
+          req.scopes = decoded.scopes;
         }
         next();
       }).catch((error) => {
