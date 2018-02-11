@@ -86,3 +86,18 @@ export async function findWinningAllianceForMatch(baseObj: any) {
       return null;  
   }
 }
+
+export async function findMatchesForTeam(teamId: string) {
+  return MatchModel.find({
+    $or: [
+      { 'blue_alliance.teams': teamId },
+      { 'red_alliance.teams': teamId }
+    ]
+  }).then((matches: InstanceType<Match>[]) => {
+    const matchObjs = [];
+    for (let i = 0; i < matches.length; i++) {
+      matchObjs.push(actionProcessor(matches[i]));
+    }
+    return matchObjs;
+  });
+}

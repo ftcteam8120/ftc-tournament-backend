@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import * as shortid from 'shortid';
 import { TeamModel, Team } from '../models/Team';
 import actionProcessor from '../utils/actionProcessor';
+import { interpolateFirstTeamData } from '../utils/FIRSTActions';
 
 export async function findTeam(id: string | number) {
   let query;
@@ -18,7 +19,13 @@ export async function findTeam(id: string | number) {
     }
   }
   return TeamModel.findOne(query).then((team: InstanceType<Team>) => {
-    return actionProcessor(team);
+    if (!team && (typeof id) === 'number') {
+      return interpolateFirstTeamData(id as number, null);
+    } else if (team) {
+      return interpolateFirstTeamData(team.number, team);
+    } else {
+      throw new Error('Cannot create a team without a number');
+    }
   });
 }
 
@@ -28,21 +35,21 @@ export async function findTeams(teams?: any[]) {
     query = { _id: teams };
   }
   return TeamModel.find(query).then((teams: InstanceType<Team>[]) => {
-    const teamObjs = [];
+    const promises = [];
     for (let i = 0; i < teams.length; i++) {
-      teamObjs.push(actionProcessor(teams[i]));
+      promises.push(interpolateFirstTeamData(teams[i].number, teams[i]));
     }
-    return teamObjs;
+    return Promise.all(promises);
   });
 }
 
 export async function findTeamsForUser(id: string) {
   return TeamModel.find({ coaches: [id], members: [id] })
     .then((teams: InstanceType<Team>[]) => {
-    const teamObjs = [];
-    for (let i = 0; i < teams.length; i++) {
-      teamObjs.push(actionProcessor(teams[i]));
-    }
-    return teamObjs;
+      const promises = [];
+      for (let i = 0; i < teams.length; i++) {
+        promises.push(interpolateFirstTeamData(teams[i].number, teams[i]));
+      }
+      return Promise.all(promises);
   });
 }

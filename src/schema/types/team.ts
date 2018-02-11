@@ -1,6 +1,8 @@
 import {
   findUserById,
-  findUsers
+  findUsers,
+  findMatchesForTeam,
+  findEventsForTeam
 } from '../../actions';
 
 export const teamType = `
@@ -26,11 +28,38 @@ export const teamType = `
     country: String
     photo_url: String
   }
-  type Team implements Node {
-    id: String!
+  enum MaterialColor {
+    amber
+    blue
+    blueGrey
+    brown
+    cyan
+    deepOrange
+    deepPurple
+    green
+    grey
+    indigo
+    lightBlue
+    lightGreen
+    lime
+    orange
+    pink
+    purple
+    red
+    teal
+    yellow
+  }
+  type TeamColors {
+    primary: MaterialColor
+    secondary: MaterialColor
+  }
+  type Team {
+    id: String
     shortid: String
     coaches: [User]
     members: [User]
+    matches: [Match]
+    events: [Event]
     twitter: String
     biography: String
     name: String!
@@ -40,7 +69,10 @@ export const teamType = `
     city: String
     state: String
     country: String
+    website: String
     photo_url: String
+    banner_url: String
+    colors: TeamColors
   }
 `
 
@@ -50,5 +82,11 @@ export const teamResolvers = {
   },
   async members(baseObj) {
     return findUsers(baseObj.members);
+  },
+  async events(baseObj) {
+    return findEventsForTeam(baseObj.id);
+  },
+  async matches(baseObj) {
+    return findMatchesForTeam(baseObj.id);
   }
 }

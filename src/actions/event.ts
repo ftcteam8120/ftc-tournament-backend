@@ -284,3 +284,13 @@ export function sortRankings(baseObj, orderBy) {
     return _.orderBy(baseObj.rankings, ['rank'], ['asc']);
   }
 }
+
+export async function findEventsForTeam(teamId: string) {
+  return EventModel.find({ teams: teamId }).then((events: InstanceType<Event>[]) => {
+    let results = [];
+    for (let i = 0; i < events.length; i++) {
+      results.push(actionProcessor(events[i]));
+    }
+    return results;
+  });
+}
