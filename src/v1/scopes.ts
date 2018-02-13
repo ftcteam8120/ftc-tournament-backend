@@ -30,4 +30,4 @@ export namespace Scopes {
   }
 }
 
-export const defaultScopes = [Scopes.Teams.READ, Scopes.Events.READ, Scopes.Matches.READ].join(' ');
+export const defaultScopes = [Scopes.Teams.READ, Scopes.Events.READ, Scopes.Matches.READ, Scopes.Users.READ].join(' ');

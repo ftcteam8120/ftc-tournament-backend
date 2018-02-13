@@ -9,11 +9,7 @@ export async function findUserById(id: string) {
 }
 
 export async function findUsers(users?: any[]) {
-  let query;
-  if (users) {
-    query = { _id: users };
-  }
-  return UserModel.find(query).then((users: InstanceType<User>[]) => {
+  return UserModel.find({ _id: users }).then((users: InstanceType<User>[]) => {
     const usersObjs = [];
     for (let i = 0; i < users.length; i++) {
       usersObjs.push(actionProcessor(users[i]));

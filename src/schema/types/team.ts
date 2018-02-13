@@ -58,7 +58,6 @@ export const teamType = `
   }
   type Team {
     id: String
-    shortid: String
     coaches: [User]
     members: [User]
     matches: [Match]

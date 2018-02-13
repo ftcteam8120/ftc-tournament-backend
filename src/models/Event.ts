@@ -12,6 +12,16 @@ export enum SponsorType {
   SECONDARY = 'SECONDARY'
 }
 
+export enum EventType {
+  SCRIMMAGE = 'SCRIMMAGE',
+  MEET = 'MEET',
+  QUALIFYING = 'QUALIFYING',
+  SUPER_QUALIFYING = 'SUPER_QUALIFYING',
+  CHAMPIONSHIP = 'CHAMPIONSHIP',
+  SUPER_REGIONAL = 'SUPER_REGIONAL',
+  WORLD  = 'WORLD'
+}
+
 export class Sponsor extends Typegoose {
   @prop()
   name: string;
@@ -22,8 +32,8 @@ export class Sponsor extends Typegoose {
 }
 
 export class Ranking extends Typegoose {
-  @prop({ ref: Team })
-  team: Ref<Team>;
+  @prop()
+  team: string;
   @prop()
   ranking_points: number;
   @prop()
@@ -37,12 +47,14 @@ export class Ranking extends Typegoose {
 }
 
 export class Event extends Typegoose {
-  @prop({ required: true, unique: true, default: shortid.generate })
-  shortid: string;
+  @prop({ enum: EventType })
+  type: EventType;  
+  @prop({ required: true })
+  code: string;
   @arrayProp({ itemsRef: User, required: true })
   admins: Ref<User>[];
-  @arrayProp({ itemsRef: Team })
-  teams?: Ref<Team>[];
+  @arrayProp({ items: String })
+  teams?: string[];
   @prop()
   current_round?: number;
   @prop({ required: true })

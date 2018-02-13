@@ -13,7 +13,7 @@ export const dateScalarResolver = new GraphQLScalarType({
   },
   serialize(value: any) {
     // Serialize date values as ISO strings
-    return new Date(value).toISOString();
+    return new Date(value).toDateString();
   },
   parseLiteral(ast) {
     switch (ast.kind) {

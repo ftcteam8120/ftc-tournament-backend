@@ -36,8 +36,8 @@ class TeamColors extends Typegoose {
 }
 
 export class Team extends Typegoose {
-  @prop({ required: true, unique: true, default: shortid.generate })
-  shortid: string;
+  @prop({ required: true })
+  _id: string;  
   @arrayProp({ itemsRef: User })
   coaches?: Ref<User>[];
   @arrayProp({ itemsRef: User })

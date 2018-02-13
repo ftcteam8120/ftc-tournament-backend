@@ -14,7 +14,6 @@ const nodeInterface = `
   scalar Date
   interface Node {
     id: String!
-    shortid: String
   }
   enum Order {
     ASC

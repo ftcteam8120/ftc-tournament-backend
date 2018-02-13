@@ -8,28 +8,33 @@ import MatchModel from '../models/Match';
 import { Order } from '../schema/typeDefs';
 import * as shortid from 'shortid';
 import * as _ from 'lodash';
+import * as NodeGeocoder from 'node-geocoder';
+import { interpolateFirstEventData } from '../utils/FIRSTActions';
+
+const geocoder = NodeGeocoder({
+  provider: 'google',
+  apiKey: process.env.GEOCODING_API_KEY
+})
 
 export async function findEventById(id: string) {
-  let query;
-  if (Types.ObjectId.isValid(id)) {
-    query = { _id: id };
-  } else if (shortid.isValid(id)) {
-    query = { shortid: id };
-  } else {
-    return Promise.reject(new Error('Invalid Event ID'));
-  }
-  return EventModel.findOne(query).then((event: InstanceType<Event>) => {
-    return actionProcessor(event);
+  return EventModel.findById(id).then((event: InstanceType<Event>) => {
+    return interpolateFirstEventData(event.code, event);
+  });
+}
+
+export async function findEventByCode(code: string) {
+  return EventModel.findOne({ code }).then((event: InstanceType<Event>) => {
+    return interpolateFirstEventData(code, event);
   });
 }
 
 export async function findEvents() {
   return EventModel.find().sort({ start: -1 }).then((events: InstanceType<Event>[]) => {
-    const eventObjs = [];
+    const promises = [];
     for (let i = 0; i < events.length; i++) {
-      eventObjs.push(actionProcessor(events[i]));
+      promises.push(interpolateFirstEventData(events[i].code, events[i]));
     }
-    return eventObjs;
+    return Promise.all(promises);
   });
 }
 
@@ -292,5 +297,32 @@ export async function findEventsForTeam(teamId: string) {
       results.push(actionProcessor(events[i]));
     }
     return results;
+  });
+}
+
+export async function updateEvent(eventId: string, data: any) {
+  return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
+    if (!event) throw new Error('Event not found');
+    event.name = data.name;
+    event.description = data.description;
+    event.logo_url = data.logo_url;
+    event.start = new Date(data.start);
+    event.end = new Date(data.end);
+    if (data.location) {
+      if (data.location.address) {
+        if (!event.location) (event as any).location = {};
+        if (data.location.address) {
+          event.location.address = data.location.address;
+          return geocoder.geocode(data.location.address).then((value) => {
+            (event.location as any).coordinates = {
+              lat: value[0].latitude,
+              lng: value[0].longitude
+            };
+            return event.save();
+          });
+        }
+      }
+    }
+    return event.save();
   });
 }

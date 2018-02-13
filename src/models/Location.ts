@@ -9,11 +9,11 @@ export class Coordinates extends Typegoose {
 
 export class Location extends Typegoose {
   @prop()
-  address: string;
+  address?: string;
   @prop()
-  description: string;
+  description?: string;
   @prop()
-  place_id: string;
+  place_id?: string;
   @prop()
-  coordinates: Coordinates;
+  coordinates?: Coordinates;
 }

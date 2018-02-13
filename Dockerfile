@@ -10,6 +10,8 @@ ENV NPM_CONFIG_LOGLEVEL info
 # Set the database server and secret
 ENV MONGO_URI mongodb://admin:yGr0y63IdMWQ0fP1@ftc-tournament-server-test-shard-00-00-0pe2a.mongodb.net:27017,ftc-tournament-server-test-shard-00-01-0pe2a.mongodb.net:27017,ftc-tournament-server-test-shard-00-02-0pe2a.mongodb.net:27017/test?ssl=true&replicaSet=ftc-tournament-server-test-shard-0&authSource=admin
 ENV SECRET 491234kjsadfhjkfdsahkj23489234khjafsd234
+ENV HASHIDS_SALT FIRST
+ENV GEOCODING_API_KEY AIzaSyCGs9yE1N_7xkaBcik1tAREi_WGVr7FWoU
 
 # Copy package.json and yarn.lock
 COPY package.json /build/

@@ -20,8 +20,8 @@ class Alliance extends Typegoose {
   end?: number;
   @prop()
   penalty?: number;
-  @arrayProp({ itemsRef: Team })
-  teams: Ref<Team>[];
+  @arrayProp({ items: String })
+  teams: string[];
 }
 
 export enum MatchType {

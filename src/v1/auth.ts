@@ -80,7 +80,7 @@ function generateJWT(user: InstanceType<User>) {
   return jwt.sign({
     id: user._id,
     username: user.username,
-    scopes: user.scopes + ' ' + defaultScopes + ' ' + Scopes.Users.READ
+    scopes: user.scopes + ' ' + defaultScopes
   }, process.env.SECRET, { expiresIn: '1d' });
 }
 

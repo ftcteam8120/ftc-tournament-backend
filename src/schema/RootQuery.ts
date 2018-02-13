@@ -2,10 +2,12 @@ import {
   findEventById,
   findEvents,
   findTeam,
+  findTeamByNumber,
   findTeams,
   findEventsForAdmin,
   findMatchById,
-  findUserById
+  findUserById,
+  findEventByCode
 } from '../actions';
 
 import { Scopes } from '../v1/scopes';
@@ -13,7 +15,7 @@ import { requireScopes } from '../utils/requireScopes';
 
 export const rootQuery = `
   type Query {
-    event(id: String!): Event
+    event(id: String, code: String): Event
     match(id: String!): Match
     user(id: String!): User
     findEventsForAdmin(admin: String!): [Event]
@@ -28,9 +30,10 @@ export const rootQueryResolvers = {
     if (!requireScopes(context.scopes, Scopes.Users.READ)) throw new Error('Unauthorized');
     return await findUserById(id);
   },
-  async event(baseObj, { id }, context) {
+  async event(baseObj, { id, code }, context) {
     if (!requireScopes(context.scopes, Scopes.Events.READ)) throw new Error('Unauthorized');
-    return await findEventById(id);
+    if (id) return findEventById(id);
+    else return findEventByCode(code);
   },
   async match(baseObj, { id }, context) {
     if (!requireScopes(context.scopes, Scopes.Matches.READ)) throw new Error('Unauthorized');
@@ -38,7 +41,8 @@ export const rootQueryResolvers = {
   },
   async team(baseObj, { id, number }, context) {
     if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
-    return await findTeam(id || number);
+    if (id) return findTeam(id);
+    else return findTeamByNumber(number);
   },
   async events(baseObj, {}, context) {
     if (!requireScopes(context.scopes, Scopes.Events.READ)) throw new Error('Unauthorized');

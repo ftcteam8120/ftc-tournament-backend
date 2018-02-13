@@ -10,17 +10,34 @@ import { requireScopes } from '../../utils/requireScopes';
 import { Scopes } from '../../v1/scopes';
 
 export const eventType = `
+  input UpdateLocationInput {
+    address: String
+    description: String
+  }
+  input UpdateEventInput {
+    name: String
+    start: Date
+    end: Date
+    logo_url: String
+    location: UpdateLocationInput
+    description: String
+  }
   input CreateEventInput {
     admins: [String]
     teams: [String]
     current_round: Int
     name: String!
-    start: String
-    end: String
+    start: Date
+    end: Date
     logo_url: String
     primary_color: String
     secondary_color: String
     rankings: [CreateRankingInput]
+  }
+  input AddSponsorInput {
+    name: String
+    logo_url: String
+    type: SponsorType
   }
   input SyncRankingInput {
     team: Int
@@ -55,6 +72,15 @@ export const eventType = `
     place_id: String
     coordinates: Coordinates
   }
+  enum EventType {
+    SCRIMMAGE
+    MEET
+    QUALIFYING
+    SUPER_QUALIFYING
+    SUPER_REGIONAL
+    CHAMPIONSHIP
+    WORLD
+  }
   enum SponsorType {
     PRIMARY
     SECONDARY
@@ -77,7 +103,9 @@ export const eventType = `
   }
   type Event implements Node {
     id: String!
-    shortid: String
+    code: String!
+    type: EventType
+    season: Int
     admins: [User]
     teams: [Team]
     current_round: Int

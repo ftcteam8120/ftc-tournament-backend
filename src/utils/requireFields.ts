@@ -36,8 +36,6 @@ export function requireFields(fields: string[], multiName?: string): (req: Reque
   return (req: Request, res: Response, next: NextFunction) => {
     if (multiName) {
       if (req.body[multiName]) {
-        console.log(req.body[multiName]);
-        console.log(Array.isArray(req.body[multiName]));
         if (Array.isArray(req.body[multiName])) {
           for (let i = 0; i < req.body[multiName].length; i++) {
             let check = checkFields(fields, req.body[multiName][i]);
