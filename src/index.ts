@@ -61,15 +61,12 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 }
 
-app.listen(process.env.PORT, () => {
+/*app.listen(process.env.PORT, () => {
   logger.info('Server running on port', process.env.PORT);
-});
+});*/
 
 // Create WebSocket listener server
-const websocketServer = createServer((request, response) => {
-  response.writeHead(404);
-  response.end();
-});
+const httpServer = createServer(app);
 
 const subscriptionServer = SubscriptionServer.create(
   {
@@ -87,11 +84,11 @@ const subscriptionServer = SubscriptionServer.create(
     }
   },
   {
-    server: websocketServer,
-    path: '/graphql',
+    server: httpServer,
+    path: '/websocket',
   },
 );
 
-websocketServer.listen(process.env.WS_PORT, () => {
-  logger.info('Websocket server running on port', process.env.WS_PORT);
+httpServer.listen(process.env.PORT, () => {
+  logger.info('Server running on port', process.env.PORT);
 });

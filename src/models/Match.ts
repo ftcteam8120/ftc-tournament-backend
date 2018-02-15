@@ -22,6 +22,8 @@ class Alliance extends Typegoose {
   penalty?: number;
   @arrayProp({ items: String })
   teams: string[];
+  @arrayProp({ items: String })
+  surrogates: string[];
 }
 
 export enum MatchType {
@@ -44,7 +46,7 @@ export class Match extends Typegoose {
   @prop({ enum: Winner })
   winner: Winner;
   @prop({ required: true })
-  number: number;
+  number: number; 
   // This property is only for semifinals where there are sub matches
   @prop()
   sub?: number;

@@ -16,7 +16,6 @@ export const rootMutation = `
   type Mutation {
     createEvent(input: CreateEventInput!): Event
     addTeamsToEvent(event: String!, teams: [String]): Event
-    syncTeamsWithEvent(event: String!, teams: [SyncTeamInput]): [Team]
     syncMatchesWithEvent(event: String!, matches: [SyncMatchInput]): [Match]
     syncRankingsWithEvent(event: String!, rankings: [SyncRankingInput]): Event
     addMatchToEvent(event: String!, input: AddMatchInput!): Match
@@ -28,9 +27,6 @@ export const rootMutation = `
 export const rootMutationResolvers = {
   async createEvent(baseObj, { input }) {
     return createEvent(input);
-  },
-  async syncTeamsWithEvent(baseObj, { event, teams }) {
-    return syncTeamsWithEvent(event, teams);
   },
   async syncMatchesWithEvent(baseObj, { event, matches }) {
     return syncMatchesWithEvent(event, matches);

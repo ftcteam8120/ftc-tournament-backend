@@ -10,6 +10,7 @@ import * as shortid from 'shortid';
 import * as _ from 'lodash';
 import * as NodeGeocoder from 'node-geocoder';
 import { interpolateFirstEventData } from '../utils/FIRSTActions';
+import { TeamId } from '../utils/ids';
 
 const geocoder = NodeGeocoder({
   provider: 'google',
@@ -93,42 +94,41 @@ export async function syncTeamsWithEvent(eventId: string, data: any[]) {
   });
 }
 
-async function getTeamIdForNumber(number: number): Promise<string> {
-  return TeamModel.findOne({ number }).then((team: InstanceType<Team>) => {
-    if (!team) return null;
-    return team._id;
-  });
-}
-
-async function getTeamIdsForMatch(data: any): Promise<{ red_teams: any, blue_teams: any }> {
-  let blue_teams = [];
-  let blue_promises = [];
+function getTeamIdsForMatch(data: any): { red_teams: any, blue_teams: any, red_surrogates: any, blue_surrogates: any } {
   let red_teams = [];
-  let red_promises = [];
+  let blue_teams = [];
+  let red_surrogates = [];
+  let blue_surrogates = [];
   if (data.blue_alliance) {
     if (data.blue_alliance.teams) {
       for (let i = 0; i < data.blue_alliance.teams.length; i++) {
-        blue_promises.push(getTeamIdForNumber(data.blue_alliance.teams[i]));
+        blue_teams.push(TeamId(data.blue_alliance.teams[i]));
+      }
+    }
+    if (data.blue_alliance.surrogates) {
+      for (let i = 0; i < data.blue_alliance.surrogates.length; i++) {
+        blue_surrogates.push(TeamId(data.blue_alliance.surrogates[i]));
       }
     }
   }
   if (data.red_alliance) {
     if (data.red_alliance.teams) {
       for (let i = 0; i < data.red_alliance.teams.length; i++) {
-        red_promises.push(getTeamIdForNumber(data.red_alliance.teams[i]));
+        red_teams.push(TeamId(data.red_alliance.teams[i]));
+      }
+    }
+    if (data.red_alliance.surrogates) {
+      for (let i = 0; i < data.red_alliance.surrogates.length; i++) {
+        red_surrogates.push(TeamId(data.red_alliance.surrogates[i]));
       }
     }
   }
-  let blue = Promise.all(blue_promises);
-  let red = Promise.all(red_promises);
-  return Promise.all([blue, red]).then((results: string[][]) => {
-    blue_teams = results[0];
-    red_teams = results[1];
-    return {
-      red_teams,
-      blue_teams
-    };
-  });
+  return {
+    red_teams,
+    blue_teams,
+    red_surrogates,
+    blue_surrogates
+  };
 }
 
 /*export async function syncMatchesWithEvent(eventId: string, data: any[]) {
@@ -179,20 +179,14 @@ async function getTeamIdsForMatch(data: any): Promise<{ red_teams: any, blue_tea
 export async function syncRankingsWithEvent(eventId: string, data: any[]) {
   return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
     if (!event) throw new Error('Event not found');
-    let promises = [];
+    event.rankings = [];
     for (let i = 0; i < data.length; i++) {
-      promises.push(getTeamIdForNumber(data[i].team));
+      event.rankings.push({
+        ...data[i],
+        team: TeamId(data[i].team)
+      });
     }
-    return Promise.all(promises).then((ids: string[]) => {
-      event.rankings = [];
-      for (let i = 0; i < data.length; i++) {
-        event.rankings.push({
-          ...data[i],
-          team: ids[i]
-        });
-      }
-      return event.save();
-    });
+    return event.save();
   });
 }
 
@@ -201,6 +195,7 @@ export async function syncMatchesWithEvent(eventId: string, data: any[]) {
     if (!event) throw new Error('Event not found');
     let promises = [];
     let update_promises = [];
+    let create_promises = [];
     let results = [];
     data.forEach((value) => {
       promises.push(MatchModel.findOne({ event: eventId, number: value.number, type: value.type, sub: value.sub }));
@@ -208,42 +203,44 @@ export async function syncMatchesWithEvent(eventId: string, data: any[]) {
     return Promise.all(promises).then((matches: InstanceType<Match>[]) => {
       for (let i = 0; i < data.length; i++) {
         if (matches[i]) {
-          update_promises.push(getTeamIdsForMatch(data[i]).then((ids) => {
-            matches[i].winner = data[i].winner || matches[i].winner;
-            matches[i].red_alliance = {
-              ...matches[i].red_alliance,
-              ...data[i].red_alliance,
-              teams: ids.red_teams
-            };
-            matches[i].blue_alliance = {
-              ...matches[i].blue_alliance,
-              ...data[i].blue_alliance,
-              teams: ids.blue_teams
-            };
-            return matches[i].save();
-          }));
+          let ids = getTeamIdsForMatch(data[i]);
+          matches[i].winner = data[i].winner || matches[i].winner;
+          matches[i].red_alliance = {
+            ...matches[i].red_alliance,
+            ...data[i].red_alliance,
+            teams: ids.red_teams,
+            surrogates: ids.red_surrogates
+          };
+          matches[i].blue_alliance = {
+            ...matches[i].blue_alliance,
+            ...data[i].blue_alliance,
+            teams: ids.blue_teams,
+            surrogates: ids.blue_surrogates
+          };
+          update_promises.push(matches[i].save());
         } else {
-          update_promises.push(getTeamIdsForMatch(data[i]).then((ids) => {
-            return new MatchModel({
-              number: data[i].number,
-              winner: data[i].winner,
-              sub: data[i].sub,
-              type: data[i].type,
-              event: eventId,
-              red_alliance: {
-                ...data[i].red_alliance,
-                teams: ids.red_teams
-              },
-              blue_alliance: {
-                ...data[i].blue_alliance,
-                teams: ids.blue_teams
-              }
-            }).save();
-          }));
+          let ids = getTeamIdsForMatch(data[i]);
+          create_promises.push(new MatchModel({
+            number: data[i].number,
+            winner: data[i].winner,
+            sub: data[i].sub,
+            type: data[i].type,
+            event: eventId,
+            red_alliance: {
+              ...data[i].red_alliance,
+              teams: ids.red_teams,
+              surrogates: ids.red_surrogates
+            },
+            blue_alliance: {
+              ...data[i].blue_alliance,
+              teams: ids.blue_teams,
+              surrogates: ids.blue_surrogates
+            }
+          }).save());
         }
       }
-      return Promise.all(update_promises).then((updatedMatches: InstanceType<Match>[]) => {
-        updatedMatches.forEach((value) => {
+      return Promise.all([Promise.all(update_promises), Promise.all(create_promises)]).then((res: InstanceType<Match>[][]) => {
+        res[0].concat(res[1]).forEach((value) => {
           results.push(actionProcessor(value));
         });
         return results;

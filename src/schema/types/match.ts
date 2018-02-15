@@ -10,6 +10,7 @@ import { Scopes } from '../../v1/scopes';
 export const matchType = `
   input SyncAllianceInput {
     teams: [Int]
+    surrogates: [Int]
     total: Int
     auto: Int
     auto_b: Int
@@ -33,6 +34,7 @@ export const matchType = `
     tele: Int
     end: Int
     penalty: Int
+    surrogates: [String]
     teams: [String]
   }
   input AddMatchInput {
@@ -50,6 +52,7 @@ export const matchType = `
     tele: Int
     end: Int
     penalty: Int
+    surrogates: [Team]
     teams: [Team]
   }
   enum Winner {
@@ -81,7 +84,7 @@ export const matchResolvers = {
     return findEventById(baseObj.event);
   },
   async winning_alliance(baseObj, {}, context) {
-    return findWinningAllianceForMatch(baseObj)
+    return findWinningAllianceForMatch(baseObj);
   }
 }
 
@@ -89,5 +92,9 @@ export const allianceResolvers = {
   async teams(baseObj, {}, context) {
     if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
     return findTeams(baseObj.teams);
+  },
+  async surrogates(baseObj, {}, context) {
+    if (!requireScopes(context.scopes, Scopes.Teams.READ)) throw new Error('Unauthorized');
+    return findTeams(baseObj.surrogates);
   }
 }
