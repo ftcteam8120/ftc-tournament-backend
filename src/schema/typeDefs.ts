@@ -1,5 +1,6 @@
 import { rootQuery } from './RootQuery';
 import { rootMutation } from './RootMutation';
+import { rootSubscription } from './RootSubscription';
 import { eventType } from './types/event';
 import { teamType } from './types/team';
 import { userType } from './types/user';
@@ -28,5 +29,6 @@ export default [
   eventType,
   matchType,
   rootQuery,
-  rootMutation
+  rootMutation,
+  rootSubscription
 ];

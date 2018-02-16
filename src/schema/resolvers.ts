@@ -1,7 +1,6 @@
 import { rootQueryResolvers } from './RootQuery'
-import {
-  rootMutationResolvers
-} from './RootMutation';
+import { rootMutationResolvers } from './RootMutation';
+import { subscriptionResolvers } from './RootSubscription';
 
 import { eventResolvers, rankingResolvers } from './types/event';
 import { teamResolvers } from './types/team';
@@ -20,5 +19,6 @@ export default {
   Team: teamResolvers,
   User: userResolvers,
   Match: matchResolvers,
-  Alliance: allianceResolvers
+  Alliance: allianceResolvers,
+  Subscription: subscriptionResolvers
 };

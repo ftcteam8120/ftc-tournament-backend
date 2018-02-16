@@ -118,17 +118,17 @@ export function graphqlAuth(req: Request & { token: string, scopes: string }, re
   });
 }
 
-export async function websocketAuth(token) {
-  return new Promise((resolve, reject) => {
+export async function websocketAuth(token): Promise<{ user: User, scopes: string }> {
+  return new Promise<{ user: User, scopes: string }>((resolve, reject) => {
     jwt.verify(token, process.env.SECRET, (err: Error, decoded: any) => {
       if (!err) {
         return UserModel.findById(decoded.id, (err, user: InstanceType<User>) => {
-          resolve(user.clean());
+          resolve({ user: user.clean() as User, scopes: decoded.scopes });
         }).catch((error) => {
           reject(error);
         });
       } else {
-        resolve(null);
+        resolve({ user: null, scopes: null });
       }
     });
   });

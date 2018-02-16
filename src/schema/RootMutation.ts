@@ -11,6 +11,7 @@ import {
 
 import { Scopes } from '../v1/scopes';
 import { requireScopes } from '../utils/requireScopes';
+import { pubsub, Topics } from '../subscriptions';
 
 export const rootMutation = `
   type Mutation {
@@ -29,10 +30,16 @@ export const rootMutationResolvers = {
     return createEvent(input);
   },
   async syncMatchesWithEvent(baseObj, { event, matches }) {
-    return syncMatchesWithEvent(event, matches);
+    return syncMatchesWithEvent(event, matches).then((result) => {
+      pubsub.publish(Topics.MATCHES_UPDATED, { event: event, eventCode: result.event.code, matches: result.matches });
+      return result.matches;
+    });
   },
   async syncRankingsWithEvent(baseObj, { event, rankings }) {
-    return syncRankingsWithEvent(event, rankings);
+    return syncRankingsWithEvent(event, rankings).then((result) => {
+      pubsub.publish(Topics.RANKINGS_UPDATED, { event: event, eventCode: result.code, rankings: result.rankings });
+      return result;
+    });
   },
   async addMatchToEvent(baseObj, { event, input }) {
     return addMatchToEvent(event, input);

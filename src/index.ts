@@ -58,7 +58,10 @@ app.use('/graphql', bodyParser.json(), graphqlAuth, (req: any, res, next) => {
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  app.get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
+  app.get('/graphiql', graphiqlExpress({
+    endpointURL: '/graphql',
+    subscriptionsEndpoint: `ws://localhost:${process.env.PORT}/websocket`,
+  }));
 }
 
 /*app.listen(process.env.PORT, () => {
@@ -75,12 +78,16 @@ const subscriptionServer = SubscriptionServer.create(
     subscribe,
     onConnect: (connectionParams, webSocket) => {
       if (connectionParams.Authorization) {
-        return websocketAuth(connectionParams.Authorization).then((user) => {
+        return websocketAuth(connectionParams.Authorization).then(({ user, scopes }) => {
             return {
-              user: user
+              user,
+              scopes
             };
         });
       }
+    },
+    onOperation: (message, params, webSocket) => {
+      return { ...params, context: { scopes: defaultScopes } }
     }
   },
   {

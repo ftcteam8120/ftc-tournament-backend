@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 import * as NodeGeocoder from 'node-geocoder';
 import { interpolateFirstEventData } from '../utils/FIRSTActions';
 import { TeamId } from '../utils/ids';
+import { pubsub, Topics } from '../subscriptions';
 
 const geocoder = NodeGeocoder({
   provider: 'google',
@@ -190,7 +191,7 @@ export async function syncRankingsWithEvent(eventId: string, data: any[]) {
   });
 }
 
-export async function syncMatchesWithEvent(eventId: string, data: any[]) {
+export async function syncMatchesWithEvent(eventId: string, data: any[]): Promise<{ event: Event, matches: Match[] }> {
   return EventModel.findById(eventId).then((event: InstanceType<Event>) => {
     if (!event) throw new Error('Event not found');
     let promises = [];
@@ -243,7 +244,7 @@ export async function syncMatchesWithEvent(eventId: string, data: any[]) {
         res[0].concat(res[1]).forEach((value) => {
           results.push(actionProcessor(value));
         });
-        return results;
+        return { event: actionProcessor(event), matches: results };
       });
     });
   });
